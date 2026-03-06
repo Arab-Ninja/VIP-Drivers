@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { getLoginUrl } from '@/const';
+import { ADMIN_EMAIL } from '@shared/const';
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -84,9 +88,61 @@ export default function Home() {
             </ul>
           </nav>
 
-          <button className="btn-cta" onClick={() => setLocation('/quote')}>
-            Réserver
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {user ? (
+              <>
+                {(user.role === 'admin' || user.email === ADMIN_EMAIL) && (
+                  <button
+                    className="btn-cta"
+                    onClick={() => setLocation('/admin')}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                  >
+                    <LayoutDashboard size={16} /> Admin
+                  </button>
+                )}
+                <button
+                  onClick={logout}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #444',
+                    color: '#888888',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  <LogOut size={16} /> Déconnexion
+                </button>
+              </>
+            ) : (
+              <a
+                href={getLoginUrl()}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #d4af37',
+                  color: '#d4af37',
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <LogIn size={16} /> Connexion
+              </a>
+            )}
+            <button className="btn-cta" onClick={() => setLocation('/quote')}>
+              Réserver
+            </button>
+          </div>
         </div>
       </header>
 

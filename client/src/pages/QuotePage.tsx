@@ -85,9 +85,13 @@ export default function QuotePage() {
   const [destination, setDestination] = useState('');
   const [departurePlace, setDeparturePlace] = useState<Place | null>(null);
   const [destinationPlace, setDestinationPlace] = useState<Place | null>(null);
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [company, setCompany] = useState('');
+  const [vatNumber, setVatNumber] = useState('');
+  const [notes, setNotes] = useState('');
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -123,8 +127,8 @@ export default function QuotePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!departure || !destination || !name || !email || !phone || distance === null || estimatedPrice === null) {
-      toast.error('Veuillez remplir tous les champs et calculer la distance');
+    if (!departure || !destination || !firstName || !lastName || !email || !phone || distance === null || estimatedPrice === null) {
+      toast.error('Veuillez remplir tous les champs obligatoires et calculer la distance');
       return;
     }
     try {
@@ -132,9 +136,14 @@ export default function QuotePage() {
         vehicleId: selectedVehicleId,
         departureAddress: departure,
         destinationAddress: destination,
-        clientName: name,
+        clientName: `${firstName} ${lastName}`,
+        clientFirstName: firstName,
+        clientLastName: lastName,
         clientEmail: email,
         clientPhone: phone,
+        clientCompany: company || undefined,
+        clientVatNumber: vatNumber || undefined,
+        notes: notes || undefined,
         distanceKm: distance,
         estimatedPrice,
       });
@@ -279,19 +288,44 @@ export default function QuotePage() {
                   3. Vos coordonnées
                 </h2>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div>
-                    <label style={labelStyle}>Nom complet</label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Jean Dupont" style={inputStyle} required />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={labelStyle}>Prénom *</label>
+                      <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" style={inputStyle} required />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Nom *</label>
+                      <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" style={inputStyle} required />
+                    </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>
-                      <label style={labelStyle}>Email</label>
+                      <label style={labelStyle}>Email *</label>
                       <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jean@exemple.com" style={inputStyle} required />
                     </div>
                     <div>
-                      <label style={labelStyle}>Téléphone</label>
+                      <label style={labelStyle}>Téléphone *</label>
                       <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+32 4 XX XX XX XX" style={inputStyle} required />
                     </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={labelStyle}>Société <span style={{ color: '#555', fontWeight: 400, textTransform: 'none' }}>(optionnel)</span></label>
+                      <input type="text" value={company} onChange={e => setCompany(e.target.value)} placeholder="Nom de votre société" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>N° TVA <span style={{ color: '#555', fontWeight: 400, textTransform: 'none' }}>(optionnel)</span></label>
+                      <input type="text" value={vatNumber} onChange={e => setVatNumber(e.target.value)} placeholder="BE 0123.456.789" style={inputStyle} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Notes <span style={{ color: '#555', fontWeight: 400, textTransform: 'none' }}>(optionnel)</span></label>
+                    <textarea
+                      value={notes}
+                      onChange={e => setNotes(e.target.value)}
+                      placeholder="Informations complémentaires, demandes spéciales..."
+                      style={{ ...inputStyle, minHeight: '80px', resize: 'vertical', fontFamily: 'inherit' }}
+                    />
                   </div>
                   <button
                     type="submit"

@@ -20,12 +20,12 @@ describe("Vehicle Pricing Functions", () => {
 
     it("should apply minimum distance for Classe E", () => {
       const price = calculateQuotePrice("classe-e", 5);
-      expect(price).toBe(75); // 10km (minimum) * 3€/km = 30, but pricePerHour = 75, so min is 75
+      expect(price).toBe(85); // 10km (minimum) * 3€/km = 30, but pricePerHour = 85, so min is 85
     });
 
     it("should apply minimum distance for Classe V", () => {
       const price = calculateQuotePrice("classe-v", 10);
-      expect(price).toBe(85); // 15km (minimum) * 3.5€/km = 52.5, but pricePerHour = 85, so min is 85
+      expect(price).toBe(95); // 15km (minimum) * 3.5€/km = 52.5, but pricePerHour = 95, so min is 95
     });
 
     it("should return null for invalid vehicle", () => {
@@ -35,7 +35,7 @@ describe("Vehicle Pricing Functions", () => {
 
     it("should handle decimal distances", () => {
       const price = calculateQuotePrice("classe-e", 25.5);
-      expect(price).toBe(76.5); // 25.5km * 3€/km = 76.5, which is > 75, so no change
+      expect(price).toBe(85); // 25.5km * 3€/km = 76.5, but pricePerHour = 85, so min is 85
     });
 
     it("should use distance price when it exceeds pricePerHour", () => {
@@ -47,17 +47,17 @@ describe("Vehicle Pricing Functions", () => {
   describe("calculateDisposalPrice", () => {
     it("should calculate disposal price for Classe E", () => {
       const price = calculateDisposalPrice("classe-e", 8);
-      expect(price).toBe(600); // 8h * 75€/h
+      expect(price).toBe(680); // 8h * 85€/h
     });
 
     it("should calculate disposal price for Classe S", () => {
       const price = calculateDisposalPrice("classe-s", 8);
-      expect(price).toBe(760); // 8h * 95€/h
+      expect(price).toBe(960); // 8h * 120€/h
     });
 
     it("should calculate disposal price for Classe V", () => {
       const price = calculateDisposalPrice("classe-v", 8);
-      expect(price).toBe(680); // 8h * 85€/h
+      expect(price).toBe(760); // 8h * 95€/h
     });
 
     it("should return null for invalid vehicle", () => {
@@ -67,7 +67,7 @@ describe("Vehicle Pricing Functions", () => {
 
     it("should handle decimal hours", () => {
       const price = calculateDisposalPrice("classe-e", 2.5);
-      expect(price).toBe(187.5); // 2.5h * 75€/h
+      expect(price).toBe(212.5); // 2.5h * 85€/h
     });
   });
 
