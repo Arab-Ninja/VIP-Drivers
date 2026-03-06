@@ -30,8 +30,12 @@ export const appRouter = router({
         distanceKm: z.number().positive(),
         estimatedPrice: z.number().nonnegative(),
         clientName: z.string().min(1),
+        clientFirstName: z.string().min(1),
+        clientLastName: z.string().min(1),
         clientEmail: z.string().email(),
         clientPhone: z.string().min(1),
+        clientCompany: z.string().optional(),
+        clientVatNumber: z.string().optional(),
         notes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -42,16 +46,34 @@ export const appRouter = router({
           distanceKm: input.distanceKm,
           estimatedPrice: input.estimatedPrice,
           clientName: input.clientName,
+          clientFirstName: input.clientFirstName,
+          clientLastName: input.clientLastName,
           clientEmail: input.clientEmail,
           clientPhone: input.clientPhone,
+          clientCompany: input.clientCompany,
+          clientVatNumber: input.clientVatNumber,
           notes: input.notes,
           status: "pending",
         });
         
         if (quote) {
+          const notifLines = [
+            `👤 Client: ${input.clientFirstName} ${input.clientLastName}`,
+            `📧 Email: ${input.clientEmail}`,
+            `📞 Téléphone: ${input.clientPhone}`,
+            ...(input.clientCompany ? [`🏢 Société: ${input.clientCompany}`] : []),
+            ...(input.clientVatNumber ? [`🔢 N° TVA: ${input.clientVatNumber}`] : []),
+            ``,
+            `🚗 Véhicule: ${input.vehicleId}`,
+            `📍 Départ: ${input.departureAddress}`,
+            `🏁 Destination: ${input.destinationAddress}`,
+            `📏 Distance: ${input.distanceKm} km`,
+            `💶 Prix estimé: ${input.estimatedPrice}€`,
+            ...(input.notes ? [`📝 Notes: ${input.notes}`] : []),
+          ];
           await notifyOwner({
-            title: "Nouvelle demande de devis",
-            content: `${input.clientName} a demandé un devis pour un trajet de ${input.distanceKm}km. Email: ${input.clientEmail}`,
+            title: `Nouvelle demande de devis - ${input.clientFirstName} ${input.clientLastName}`,
+            content: notifLines.join('\n'),
           });
         }
         

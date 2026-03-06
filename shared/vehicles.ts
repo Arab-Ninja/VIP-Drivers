@@ -24,7 +24,7 @@ export const VEHICLES = {
       "Coffre spacieux"
     ],
     pricePerKm: 3.0, // EUR par km
-    pricePerHour: 75, // EUR par heure avec chauffeur
+    pricePerHour: 85, // EUR par heure avec chauffeur
     minDistance: 10, // km minimum
   },
   CLASSE_S: {
@@ -47,7 +47,7 @@ export const VEHICLES = {
       "Équipements premium"
     ],
     pricePerKm: 4.0, // EUR par km
-    pricePerHour: 95, // EUR par heure avec chauffeur
+    pricePerHour: 120, // EUR par heure avec chauffeur
     minDistance: 10, // km minimum
   },
   CLASSE_V: {
@@ -70,7 +70,7 @@ export const VEHICLES = {
       "Idéal pour groupes"
     ],
     pricePerKm: 3.5, // EUR par km
-    pricePerHour: 85, // EUR par heure avec chauffeur
+    pricePerHour: 95, // EUR par heure avec chauffeur
     minDistance: 15, // km minimum
   },
 } as const;

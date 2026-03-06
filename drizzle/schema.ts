@@ -34,8 +34,12 @@ export const quotes = mysqlTable("quotes", {
   distanceKm: int("distanceKm").notNull(),
   estimatedPrice: int("estimatedPrice").notNull(), // Stocké en centimes
   clientName: varchar("clientName", { length: 255 }).notNull(),
+  clientFirstName: varchar("clientFirstName", { length: 128 }),
+  clientLastName: varchar("clientLastName", { length: 128 }),
   clientEmail: varchar("clientEmail", { length: 320 }).notNull(),
   clientPhone: varchar("clientPhone", { length: 20 }).notNull(),
+  clientCompany: varchar("clientCompany", { length: 255 }),
+  clientVatNumber: varchar("clientVatNumber", { length: 64 }),
   notes: text("notes"),
   status: mysqlEnum("status", ["pending", "accepted", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
