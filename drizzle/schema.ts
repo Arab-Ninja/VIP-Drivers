@@ -65,3 +65,22 @@ export const disposalRequests = mysqlTable("disposalRequests", {
 
 export type DisposalRequest = typeof disposalRequests.$inferSelect;
 export type InsertDisposalRequest = typeof disposalRequests.$inferInsert;
+
+export const vehicleConfigs = mysqlTable("vehicleConfigs", {
+  id: int("id").autoincrement().primaryKey(),
+  vehicleId: varchar("vehicleId", { length: 64 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  category: varchar("category", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  features: text("features").notNull(), // JSON array stored as text
+  pricePerKm: int("pricePerKm").notNull(), // stored as cents (multiply by 100)
+  pricePerHour: int("pricePerHour").notNull(), // stored in euros (whole number)
+  minDistance: int("minDistance").notNull(),
+  images: text("images").notNull(), // JSON array stored as text
+  active: mysqlEnum("active", ["yes", "no"]).default("yes").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type VehicleConfig = typeof vehicleConfigs.$inferSelect;
+export type InsertVehicleConfig = typeof vehicleConfigs.$inferInsert;

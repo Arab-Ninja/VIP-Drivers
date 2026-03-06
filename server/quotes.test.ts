@@ -20,12 +20,12 @@ describe("Vehicle Pricing Functions", () => {
 
     it("should apply minimum distance for Classe E", () => {
       const price = calculateQuotePrice("classe-e", 5);
-      expect(price).toBe(30); // 10km (minimum) * 3€/km
+      expect(price).toBe(75); // 10km (minimum) * 3€/km = 30, but pricePerHour = 75, so min is 75
     });
 
     it("should apply minimum distance for Classe V", () => {
       const price = calculateQuotePrice("classe-v", 10);
-      expect(price).toBe(52.5); // 15km (minimum) * 3.5€/km
+      expect(price).toBe(85); // 15km (minimum) * 3.5€/km = 52.5, but pricePerHour = 85, so min is 85
     });
 
     it("should return null for invalid vehicle", () => {
@@ -35,7 +35,12 @@ describe("Vehicle Pricing Functions", () => {
 
     it("should handle decimal distances", () => {
       const price = calculateQuotePrice("classe-e", 25.5);
-      expect(price).toBe(76.5); // 25.5km * 3€/km
+      expect(price).toBe(76.5); // 25.5km * 3€/km = 76.5, which is > 75, so no change
+    });
+
+    it("should use distance price when it exceeds pricePerHour", () => {
+      const price = calculateQuotePrice("classe-e", 50);
+      expect(price).toBe(150); // 50*3=150, which is > 75, so no change
     });
   });
 

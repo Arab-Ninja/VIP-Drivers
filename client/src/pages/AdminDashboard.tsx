@@ -5,7 +5,8 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
-import { Plus, Trash2, BarChart3, Users, FileText, Calendar } from 'lucide-react';
+import { Plus, Trash2, BarChart3, Users, FileText, Calendar, Edit2, Check, X } from 'lucide-react';
+import { getAllVehicles } from '@shared/vehicles';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -18,6 +19,11 @@ export default function AdminDashboard() {
     pricePerKm: 0,
     pricePerHour: 0,
   });
+  const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null);
+  const [editPricePerKm, setEditPricePerKm] = useState<number>(0);
+  const [editPricePerHour, setEditPricePerHour] = useState<number>(0);
+
+  const staticVehicles = getAllVehicles();
 
   // Vérifier que l'utilisateur est le propriétaire
   const ownerOpenId = import.meta.env.VITE_OWNER_OPEN_ID;
@@ -81,6 +87,37 @@ export default function AdminDashboard() {
   // Mutations
   const createVehicleMutation = trpc.vehicles.create.useMutation();
   const deleteVehicleMutation = trpc.vehicles.delete.useMutation();
+  const upsertVehicleMutation = trpc.vehicles.upsert.useMutation();
+
+  const startEditing = (vehicle: { id: string; pricePerKm: number; pricePerHour: number }) => {
+    setEditingVehicleId(vehicle.id);
+    setEditPricePerKm(vehicle.pricePerKm);
+    setEditPricePerHour(vehicle.pricePerHour);
+  };
+
+  const cancelEditing = () => {
+    setEditingVehicleId(null);
+  };
+
+  const saveEditing = async (vehicle: any) => {
+    try {
+      await upsertVehicleMutation.mutateAsync({
+        vehicleId: vehicle.id,
+        name: vehicle.name,
+        category: vehicle.category || '',
+        description: vehicle.description || '',
+        features: vehicle.features || [],
+        pricePerKm: editPricePerKm,
+        pricePerHour: editPricePerHour,
+        minDistance: vehicle.minDistance || 10,
+        images: vehicle.images || [],
+      });
+      toast.success('Prix mis à jour!');
+      setEditingVehicleId(null);
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    }
+  };
 
   const handleAddVehicle = async () => {
     if (!newVehicle.name || !newVehicle.model || newVehicle.pricePerKm <= 0 || newVehicle.pricePerHour <= 0) {
@@ -224,100 +261,139 @@ export default function AdminDashboard() {
                     placeholder="Nom (ex: Mercedes Classe E)"
                     value={newVehicle.name}
                     onChange={(e) => setNewVehicle({ ...newVehicle, name: e.target.value })}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333333',
-                      color: '#ffffff',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                    }}
+                    style={{ background: '#1a1a1a', border: '1px solid #333333', color: '#ffffff', padding: '0.75rem', borderRadius: '0.5rem' }}
                   />
                   <input
                     type="text"
                     placeholder="Modèle"
                     value={newVehicle.model}
                     onChange={(e) => setNewVehicle({ ...newVehicle, model: e.target.value })}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333333',
-                      color: '#ffffff',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                    }}
+                    style={{ background: '#1a1a1a', border: '1px solid #333333', color: '#ffffff', padding: '0.75rem', borderRadius: '0.5rem' }}
                   />
                   <input
                     type="number"
                     placeholder="Prix/km"
                     value={newVehicle.pricePerKm}
                     onChange={(e) => setNewVehicle({ ...newVehicle, pricePerKm: parseFloat(e.target.value) })}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333333',
-                      color: '#ffffff',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                    }}
+                    style={{ background: '#1a1a1a', border: '1px solid #333333', color: '#ffffff', padding: '0.75rem', borderRadius: '0.5rem' }}
                   />
                   <input
                     type="number"
                     placeholder="Prix/heure"
                     value={newVehicle.pricePerHour}
                     onChange={(e) => setNewVehicle({ ...newVehicle, pricePerHour: parseFloat(e.target.value) })}
-                    style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #333333',
-                      color: '#ffffff',
-                      padding: '0.75rem',
-                      borderRadius: '0.5rem',
-                    }}
+                    style={{ background: '#1a1a1a', border: '1px solid #333333', color: '#ffffff', padding: '0.75rem', borderRadius: '0.5rem' }}
                   />
                 </div>
                 <button
                   onClick={handleAddVehicle}
                   disabled={createVehicleMutation.isPending}
-                  style={{
-                    background: '#d4af37',
-                    color: '#000000',
-                    border: 'none',
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '0.5rem',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                  }}
+                  style={{ background: '#d4af37', color: '#000000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600 }}
                 >
                   {createVehicleMutation.isPending ? 'Ajout en cours...' : 'Ajouter'}
                 </button>
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              {vehicles.map((vehicle: any) => (
-                <div key={vehicle.id} style={{ background: '#111111', border: '1px solid #333333', padding: '1.5rem', borderRadius: '0.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                    <div>
-                      <h3 style={{ color: '#d4af37', margin: '0 0 0.5rem 0' }}>{vehicle.name}</h3>
-                      <p style={{ color: '#888888', margin: 0, fontSize: '0.875rem' }}>{vehicle.model}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+              {staticVehicles.map((vehicle) => {
+                const isEditing = editingVehicleId === vehicle.id;
+                return (
+                  <div key={vehicle.id} style={{ background: '#111111', border: '1px solid #333333', borderRadius: '0.75rem', overflow: 'hidden' }}>
+                    {/* Vehicle Images */}
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={vehicle.images[0]}
+                        alt={vehicle.name}
+                        style={{ width: '100%', height: '180px', objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <div style={{ position: 'absolute', bottom: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.25rem' }}>
+                        {vehicle.images.slice(1).map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`${vehicle.name} ${i + 2}`}
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '0.25rem', border: '1px solid #444' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteVehicle(vehicle.id)}
-                      style={{
-                        background: '#ff4444',
-                        border: 'none',
-                        color: '#ffffff',
-                        padding: '0.5rem',
-                        borderRadius: '0.25rem',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
+
+                    <div style={{ padding: '1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
+                        <div>
+                          <h3 style={{ color: '#d4af37', margin: '0 0 0.25rem 0', fontSize: '1rem' }}>{vehicle.name}</h3>
+                          <p style={{ color: '#888888', margin: 0, fontSize: '0.8rem' }}>{vehicle.category}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {!isEditing ? (
+                            <button
+                              onClick={() => startEditing({ id: vehicle.id, pricePerKm: vehicle.pricePerKm, pricePerHour: vehicle.pricePerHour })}
+                              style={{ background: '#1a1a1a', border: '1px solid #444', color: '#d4af37', padding: '0.4rem', borderRadius: '0.25rem', cursor: 'pointer' }}
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => saveEditing(vehicle)}
+                                disabled={upsertVehicleMutation.isPending}
+                                style={{ background: '#1a3a1a', border: '1px solid #4caf50', color: '#4caf50', padding: '0.4rem', borderRadius: '0.25rem', cursor: 'pointer' }}
+                              >
+                                <Check size={14} />
+                              </button>
+                              <button
+                                onClick={cancelEditing}
+                                style={{ background: '#3a1a1a', border: '1px solid #f44336', color: '#f44336', padding: '0.4rem', borderRadius: '0.25rem', cursor: 'pointer' }}
+                              >
+                                <X size={14} />
+                              </button>
+                            </>
+                          )}
+                          <button
+                            onClick={() => handleDeleteVehicle(vehicle.id)}
+                            style={{ background: '#3a1a1a', border: '1px solid #f44336', color: '#f44336', padding: '0.4rem', borderRadius: '0.25rem', cursor: 'pointer' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {isEditing ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                          <div>
+                            <label style={{ color: '#888', fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>Prix/km (€)</label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={editPricePerKm}
+                              onChange={(e) => setEditPricePerKm(parseFloat(e.target.value))}
+                              style={{ width: '100%', background: '#1a1a1a', border: '1px solid #d4af37', color: '#fff', padding: '0.5rem', borderRadius: '0.25rem', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ color: '#888', fontSize: '0.75rem', display: 'block', marginBottom: '0.25rem' }}>Prix/h (€)</label>
+                            <input
+                              type="number"
+                              value={editPricePerHour}
+                              onChange={(e) => setEditPricePerHour(parseFloat(e.target.value))}
+                              style={{ width: '100%', background: '#1a1a1a', border: '1px solid #d4af37', color: '#fff', padding: '0.5rem', borderRadius: '0.25rem', boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ color: '#888888', fontSize: '0.875rem' }}>
+                          <p style={{ margin: '0.25rem 0' }}>Prix/km: <span style={{ color: '#d4af37' }}>{vehicle.pricePerKm}€</span></p>
+                          <p style={{ margin: '0.25rem 0' }}>Prix/h: <span style={{ color: '#d4af37' }}>{vehicle.pricePerHour}€</span></p>
+                          <p style={{ margin: '0.25rem 0' }}>Distance min: <span style={{ color: '#d4af37' }}>{vehicle.minDistance} km</span></p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ color: '#888888', fontSize: '0.875rem' }}>
-                    <p style={{ margin: '0.25rem 0' }}>Prix/km: <span style={{ color: '#d4af37' }}>{vehicle.pricePerKm}€</span></p>
-                    <p style={{ margin: '0.25rem 0' }}>Prix/h: <span style={{ color: '#d4af37' }}>{vehicle.pricePerHour}€</span></p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

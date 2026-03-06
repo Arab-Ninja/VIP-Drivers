@@ -3,8 +3,10 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests } from "./db";
+import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { getAllVehicles } from "@shared/vehicles";
+import { storagePut } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -102,11 +104,107 @@ export const appRouter = router({
   }),
 
   vehicles: router({
-    list: publicProcedure.query(() => [
-      { id: 'classe-e', name: 'Mercedes Classe E', model: 'E-Class', pricePerKm: 3, pricePerHour: 85 },
-      { id: 'classe-s', name: 'Mercedes Classe S', model: 'S-Class', pricePerKm: 4, pricePerHour: 120 },
-      { id: 'classe-v', name: 'Mercedes Classe V', model: 'V-Class', pricePerKm: 3.5, pricePerHour: 95 },
-    ]),
+    list: publicProcedure.query(async () => {
+      const dbConfigs = await getAllVehicleConfigs();
+      if (dbConfigs.length > 0) {
+        return dbConfigs.map(c => ({
+          id: c.vehicleId,
+          name: c.name,
+          category: c.category,
+          description: c.description,
+          features: JSON.parse(c.features) as string[],
+          pricePerKm: c.pricePerKm / 100,
+          pricePerHour: c.pricePerHour,
+          minDistance: c.minDistance,
+          images: JSON.parse(c.images) as string[],
+        }));
+      }
+      // Fallback to static vehicles
+      return getAllVehicles().map(v => ({
+        id: v.id,
+        name: v.name,
+        category: v.category,
+        description: v.description,
+        features: [...v.features] as string[],
+        pricePerKm: v.pricePerKm,
+        pricePerHour: v.pricePerHour,
+        minDistance: v.minDistance,
+        images: [...v.images] as string[],
+      }));
+    }),
+    upsert: publicProcedure
+      .input(z.object({
+        vehicleId: z.string(),
+        name: z.string(),
+        category: z.string(),
+        description: z.string(),
+        features: z.array(z.string()),
+        pricePerKm: z.number().positive(),
+        pricePerHour: z.number().positive(),
+        minDistance: z.number().positive(),
+        images: z.array(z.string()),
+      }))
+      .mutation(async ({ input }) => {
+        await upsertVehicleConfig({
+          vehicleId: input.vehicleId,
+          name: input.name,
+          category: input.category,
+          description: input.description,
+          features: JSON.stringify(input.features),
+          pricePerKm: Math.round(input.pricePerKm * 100),
+          pricePerHour: input.pricePerHour,
+          minDistance: input.minDistance,
+          images: JSON.stringify(input.images),
+          active: "yes",
+        });
+        return { success: true };
+      }),
+    delete: publicProcedure
+      .input(z.object({ vehicleId: z.string() }))
+      .mutation(async ({ input }) => {
+        await deleteVehicleConfig(input.vehicleId);
+        return { success: true };
+      }),
+    addImage: publicProcedure
+      .input(z.object({
+        vehicleId: z.string(),
+        imageUrl: z.string().url(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getVehicleConfigById } = await import("./db");
+        const config = await getVehicleConfigById(input.vehicleId);
+        if (!config) return { success: false, error: "Vehicle not found" };
+        const images: string[] = JSON.parse(config.images);
+        images.push(input.imageUrl);
+        await upsertVehicleConfig({ ...config, images: JSON.stringify(images) });
+        return { success: true };
+      }),
+    removeImage: publicProcedure
+      .input(z.object({
+        vehicleId: z.string(),
+        imageUrl: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getVehicleConfigById } = await import("./db");
+        const config = await getVehicleConfigById(input.vehicleId);
+        if (!config) return { success: false, error: "Vehicle not found" };
+        const images: string[] = JSON.parse(config.images).filter((url: string) => url !== input.imageUrl);
+        await upsertVehicleConfig({ ...config, images: JSON.stringify(images) });
+        return { success: true };
+      }),
+    uploadImage: publicProcedure
+      .input(z.object({
+        vehicleId: z.string(),
+        base64Data: z.string(),
+        fileName: z.string(),
+        contentType: z.string().default("image/jpeg"),
+      }))
+      .mutation(async ({ input }) => {
+        const buffer = Buffer.from(input.base64Data, "base64");
+        const key = `vehicles/${input.vehicleId}/${Date.now()}-${input.fileName}`;
+        const { url } = await storagePut(key, buffer, input.contentType);
+        return { success: true, url };
+      }),
     create: publicProcedure
       .input(z.object({
         name: z.string(),
@@ -116,11 +214,6 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         return { id: Math.random().toString(), ...input };
-      }),
-    delete: publicProcedure
-      .input(z.object({ vehicleId: z.string() }))
-      .mutation(async ({ input }) => {
-        return { success: true };
       }),
   }),
 });

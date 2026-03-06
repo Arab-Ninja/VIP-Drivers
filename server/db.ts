@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, Quote, InsertQuote, quotes, DisposalRequest, InsertDisposalRequest, disposalRequests } from "../drizzle/schema";
+import { InsertUser, users, Quote, InsertQuote, quotes, DisposalRequest, InsertDisposalRequest, disposalRequests, VehicleConfig, InsertVehicleConfig, vehicleConfigs } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -149,4 +149,66 @@ export async function getAllDisposalRequests(): Promise<DisposalRequest[]> {
   if (!db) return [];
   
   return db.select().from(disposalRequests).orderBy(disposalRequests.createdAt);
+}
+
+export async function getAllVehicleConfigs(): Promise<VehicleConfig[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    return db.select().from(vehicleConfigs).where(eq(vehicleConfigs.active, "yes")).orderBy(vehicleConfigs.id);
+  } catch (error) {
+    console.error("[Database] Failed to get vehicle configs:", error);
+    return [];
+  }
+}
+
+export async function getVehicleConfigById(vehicleId: string): Promise<VehicleConfig | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(vehicleConfigs).where(eq(vehicleConfigs.vehicleId, vehicleId)).limit(1);
+  return result[0] || null;
+}
+
+export async function upsertVehicleConfig(config: InsertVehicleConfig): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot upsert vehicle config: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(vehicleConfigs).values(config).onDuplicateKeyUpdate({
+      set: {
+        name: config.name,
+        category: config.category,
+        description: config.description,
+        features: config.features,
+        pricePerKm: config.pricePerKm,
+        pricePerHour: config.pricePerHour,
+        minDistance: config.minDistance,
+        images: config.images,
+        active: config.active,
+      },
+    });
+  } catch (error) {
+    console.error("[Database] Failed to upsert vehicle config:", error);
+    throw error;
+  }
+}
+
+export async function deleteVehicleConfig(vehicleId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete vehicle config: database not available");
+    return;
+  }
+
+  try {
+    await db.delete(vehicleConfigs).where(eq(vehicleConfigs.vehicleId, vehicleId));
+  } catch (error) {
+    console.error("[Database] Failed to delete vehicle config:", error);
+    throw error;
+  }
 }
