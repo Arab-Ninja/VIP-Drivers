@@ -16,7 +16,7 @@ interface Place {
   lon: number;
 }
 
-function VehicleCarousel({ images, vehicleName }: { images: string[]; vehicleName: string }) {
+function VehicleCarousel({ images, vehicleName }: { images: readonly string[]; vehicleName: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const prev = () => setCurrentIndex(i => (i - 1 + images.length) % images.length);
@@ -210,7 +210,7 @@ export default function QuotePage() {
                 {selectedVehicleId === vehicle.id && (
                   <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: '#d4af37', borderRadius: '50%', width: '1.5rem', height: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '0.75rem', fontWeight: 900 }}>✓</div>
                 )}
-                <VehicleCarousel images={[...vehicle.images] as string[]} vehicleName={vehicle.name} />
+                <VehicleCarousel images={vehicle.images} vehicleName={vehicle.name} />
                 <div style={{ marginTop: '1rem' }}>
                   <h3 style={{ color: '#ffffff', fontWeight: 700, margin: '0 0 0.25rem', fontSize: '1rem' }}>{vehicle.name}</h3>
                   <p style={{ color: '#888888', fontSize: '0.8rem', margin: '0 0 0.75rem' }}>{vehicle.category}</p>

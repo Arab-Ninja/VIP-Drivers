@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig, getVehicleConfigById } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { getAllVehicles } from "@shared/vehicles";
@@ -132,7 +132,7 @@ export const appRouter = router({
         images: [...v.images] as string[],
       }));
     }),
-    upsert: publicProcedure
+    upsert: adminProcedure
       .input(z.object({
         vehicleId: z.string(),
         name: z.string(),
@@ -159,13 +159,13 @@ export const appRouter = router({
         });
         return { success: true };
       }),
-    delete: publicProcedure
+    delete: adminProcedure
       .input(z.object({ vehicleId: z.string() }))
       .mutation(async ({ input }) => {
         await deleteVehicleConfig(input.vehicleId);
         return { success: true };
       }),
-    addImage: publicProcedure
+    addImage: adminProcedure
       .input(z.object({
         vehicleId: z.string(),
         imageUrl: z.string().url(),
@@ -178,7 +178,7 @@ export const appRouter = router({
         await upsertVehicleConfig({ ...config, images: JSON.stringify(images) });
         return { success: true };
       }),
-    removeImage: publicProcedure
+    removeImage: adminProcedure
       .input(z.object({
         vehicleId: z.string(),
         imageUrl: z.string(),
@@ -190,16 +190,17 @@ export const appRouter = router({
         await upsertVehicleConfig({ ...config, images: JSON.stringify(images) });
         return { success: true };
       }),
-    uploadImage: publicProcedure
+    uploadImage: adminProcedure
       .input(z.object({
         vehicleId: z.string(),
         base64Data: z.string(),
-        fileName: z.string(),
-        contentType: z.string().default("image/jpeg"),
+        fileName: z.string().regex(/^[a-zA-Z0-9._-]+$/, "Invalid file name"),
+        contentType: z.string().regex(/^image\/(jpeg|png|webp|gif)$/, "Only image files allowed").default("image/jpeg"),
       }))
       .mutation(async ({ input }) => {
         const buffer = Buffer.from(input.base64Data, "base64");
-        const key = `vehicles/${input.vehicleId}/${Date.now()}-${input.fileName}`;
+        const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const key = `vehicles/${input.vehicleId}/${Date.now()}-${safeFileName}`;
         const { url } = await storagePut(key, buffer, input.contentType);
         return { success: true, url };
       }),

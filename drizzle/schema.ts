@@ -73,8 +73,8 @@ export const vehicleConfigs = mysqlTable("vehicleConfigs", {
   category: varchar("category", { length: 255 }).notNull(),
   description: text("description").notNull(),
   features: text("features").notNull(), // JSON array stored as text
-  pricePerKm: int("pricePerKm").notNull(), // stored as cents (multiply by 100)
-  pricePerHour: int("pricePerHour").notNull(), // stored in euros (whole number)
+  pricePerKm: int("pricePerKm").notNull(), // stored in euro-cents (e.g. 3.50€/km → 350)
+  pricePerHour: int("pricePerHour").notNull(), // stored in whole euros (e.g. 75€/h → 75)
   minDistance: int("minDistance").notNull(),
   images: text("images").notNull(), // JSON array stored as text
   active: mysqlEnum("active", ["yes", "no"]).default("yes").notNull(),
