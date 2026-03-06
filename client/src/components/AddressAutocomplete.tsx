@@ -132,7 +132,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
           }}
         />
         <div style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#888888' }}>
-          {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <MapPin size={16} />}
+          {isLoading ? <Loader2 size={16} style={{ animation: 'spin-ac 1s linear infinite' }} /> : <MapPin size={16} />}
         </div>
       </div>
       {isOpen && suggestions.length > 0 && (
@@ -175,7 +175,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
           ))}
         </ul>
       )}
-      <style>{`@keyframes spin { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }`}</style>
+      <style>{`@keyframes spin-ac { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }`}</style>
     </div>
   );
 }

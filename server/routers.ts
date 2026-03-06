@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig } from "./db";
+import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig, getVehicleConfigById } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { getAllVehicles } from "@shared/vehicles";
 import { storagePut } from "./storage";
@@ -171,7 +171,6 @@ export const appRouter = router({
         imageUrl: z.string().url(),
       }))
       .mutation(async ({ input }) => {
-        const { getVehicleConfigById } = await import("./db");
         const config = await getVehicleConfigById(input.vehicleId);
         if (!config) return { success: false, error: "Vehicle not found" };
         const images: string[] = JSON.parse(config.images);
@@ -185,7 +184,6 @@ export const appRouter = router({
         imageUrl: z.string(),
       }))
       .mutation(async ({ input }) => {
-        const { getVehicleConfigById } = await import("./db");
         const config = await getVehicleConfigById(input.vehicleId);
         if (!config) return { success: false, error: "Vehicle not found" };
         const images: string[] = JSON.parse(config.images).filter((url: string) => url !== input.imageUrl);
