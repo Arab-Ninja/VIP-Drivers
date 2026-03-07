@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, Quote, InsertQuote, quotes, DisposalRequest, InsertDisposalRequest, disposalRequests, VehicleConfig, InsertVehicleConfig, vehicleConfigs } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -274,5 +274,5 @@ export async function getQuotesByEmail(email: string): Promise<Quote[]> {
   const db = await getDb();
   if (!db) return [];
 
-  return db.select().from(quotes).where(eq(quotes.clientEmail, email)).orderBy(quotes.createdAt);
+  return db.select().from(quotes).where(eq(quotes.clientEmail, email)).orderBy(desc(quotes.createdAt));
 }

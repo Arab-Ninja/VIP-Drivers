@@ -113,7 +113,9 @@ export default function QuotePage() {
 
   const createQuoteMutation = trpc.quotes.create.useMutation();
 
-  const selectedVehicle = (vehicles as any[]).find((v: any) => v.id === selectedVehicleId) || (vehicles as any[])[0];
+  const selectedVehicle = vehicles.length > 0
+    ? ((vehicles as any[]).find((v: any) => v.id === selectedVehicleId) || (vehicles as any[])[0])
+    : null;
 
   const calculateEstimatedPrice = (vehicleId: string, distanceKm: number): number | null => {
     const vehicle = (vehicles as any[]).find((v: any) => v.id === vehicleId);

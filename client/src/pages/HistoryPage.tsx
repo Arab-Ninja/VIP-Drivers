@@ -21,12 +21,20 @@ const statusColor: Record<string, { bg: string; color: string }> = {
 };
 
 function printInvoice(quote: any) {
+  const escHtml = (str: string) =>
+    String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
   const html = `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Facture VIP Drivers - #${quote.id}</title>
+  <title>Facture VIP Drivers - #${escHtml(String(quote.id))}</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; color: #111; }
     h1 { color: #b8952e; border-bottom: 2px solid #b8952e; padding-bottom: 0.5rem; }
@@ -40,31 +48,31 @@ function printInvoice(quote: any) {
 </head>
 <body>
   <h1>🚗 VIP Drivers – Facture</h1>
-  <p><strong>Facture N°:</strong> VIP-${String(quote.id).padStart(5, '0')}</p>
-  <p><strong>Date:</strong> ${new Date(quote.createdAt).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+  <p><strong>Facture N°:</strong> VIP-${escHtml(String(quote.id).padStart(5, '0'))}</p>
+  <p><strong>Date:</strong> ${escHtml(new Date(quote.createdAt).toLocaleDateString('fr-BE', { day: '2-digit', month: 'long', year: 'numeric' }))}</p>
 
   <h2 style="font-size:1rem;margin-top:1.5rem;border-bottom:1px solid #ddd;padding-bottom:0.5rem;">Informations Client</h2>
-  <p><strong>Nom:</strong> ${quote.clientFirstName || ''} ${quote.clientLastName || quote.clientName}</p>
-  <p><strong>Email:</strong> ${quote.clientEmail}</p>
-  <p><strong>Téléphone:</strong> ${quote.clientPhone}</p>
-  ${quote.clientCompany ? `<p><strong>Société:</strong> ${quote.clientCompany}</p>` : ''}
-  ${quote.clientVatNumber ? `<p><strong>N° TVA:</strong> ${quote.clientVatNumber}</p>` : ''}
+  <p><strong>Nom:</strong> ${escHtml(`${quote.clientFirstName || ''} ${quote.clientLastName || quote.clientName}`.trim())}</p>
+  <p><strong>Email:</strong> ${escHtml(quote.clientEmail)}</p>
+  <p><strong>Téléphone:</strong> ${escHtml(quote.clientPhone)}</p>
+  ${quote.clientCompany ? `<p><strong>Société:</strong> ${escHtml(quote.clientCompany)}</p>` : ''}
+  ${quote.clientVatNumber ? `<p><strong>N° TVA:</strong> ${escHtml(quote.clientVatNumber)}</p>` : ''}
 
   <h2 style="font-size:1rem;margin-top:1.5rem;border-bottom:1px solid #ddd;padding-bottom:0.5rem;">Détails de la Course</h2>
   <table>
     <tr><th>Description</th><th>Détail</th></tr>
-    <tr><td>Véhicule</td><td>${quote.vehicleId}</td></tr>
-    <tr><td>Départ</td><td>${quote.departureAddress}</td></tr>
-    <tr><td>Destination</td><td>${quote.destinationAddress}</td></tr>
-    <tr><td>Distance</td><td>${quote.distanceKm} km</td></tr>
-    ${quote.notes ? `<tr><td>Notes</td><td>${quote.notes}</td></tr>` : ''}
+    <tr><td>Véhicule</td><td>${escHtml(quote.vehicleId)}</td></tr>
+    <tr><td>Départ</td><td>${escHtml(quote.departureAddress)}</td></tr>
+    <tr><td>Destination</td><td>${escHtml(quote.destinationAddress)}</td></tr>
+    <tr><td>Distance</td><td>${escHtml(String(quote.distanceKm))} km</td></tr>
+    ${quote.notes ? `<tr><td>Notes</td><td>${escHtml(quote.notes)}</td></tr>` : ''}
   </table>
 
   <table>
     <tr><th>Prestation</th><th>Montant</th></tr>
     <tr>
-      <td>Transfert – ${quote.vehicleId} (${quote.distanceKm} km)</td>
-      <td class="total">${quote.estimatedPrice}€</td>
+      <td>Transfert – ${escHtml(quote.vehicleId)} (${escHtml(String(quote.distanceKm))} km)</td>
+      <td class="total">${escHtml(String(quote.estimatedPrice))}€</td>
     </tr>
   </table>
 
