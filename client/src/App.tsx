@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import QuotePage from "./pages/QuotePage";
 import DisposalPage from "./pages/DisposalPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import HistoryPage from "./pages/HistoryPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/quote" component={QuotePage} />
       <Route path="/disposal" component={DisposalPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/history" component={HistoryPage} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,14 +1,48 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { Menu, X, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, LayoutDashboard, History, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getLoginUrl } from '@/const';
 import { ADMIN_EMAIL } from '@shared/const';
+import { trpc } from '@/lib/trpc';
+
+function FleetCarousel({ images, name }: { images: string[]; name: string }) {
+  const [idx, setIdx] = useState(0);
+  if (!images || images.length === 0) return null;
+  const prev = () => setIdx(i => (i - 1 + images.length) % images.length);
+  const next = () => setIdx(i => (i + 1) % images.length);
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '200px', borderRadius: '0.5rem', overflow: 'hidden', background: '#000', marginBottom: '1rem' }}>
+      <img
+        src={images[idx]}
+        alt={`${name} ${idx + 1}`}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.3s' }}
+        onError={(e) => { (e.target as HTMLImageElement).src = images[0]; }}
+      />
+      {images.length > 1 && (
+        <>
+          <button onClick={prev} style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', borderRadius: '50%', width: '2rem', height: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronLeft size={14} />
+          </button>
+          <button onClick={next} style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', borderRadius: '50%', width: '2rem', height: '2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ChevronRight size={14} />
+          </button>
+          <div style={{ position: 'absolute', bottom: '0.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.375rem' }}>
+            {images.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? '1.5rem' : '0.5rem', height: '0.5rem', borderRadius: '0.25rem', background: i === idx ? '#d4af37' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', padding: 0, transition: 'width 0.2s' }} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { data: vehicles = [] } = trpc.vehicles.list.useQuery();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -100,6 +134,23 @@ export default function Home() {
                     <LayoutDashboard size={16} /> Admin
                   </button>
                 )}
+                <button
+                  onClick={() => setLocation('/history')}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #444',
+                    color: '#d4af37',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                  }}
+                >
+                  <History size={16} /> Historique
+                </button>
                 <button
                   onClick={logout}
                   style={{
@@ -252,7 +303,7 @@ export default function Home() {
               </p>
               <button
                 className="btn-primary mt-6"
-                onClick={() => setLocation('/quote')}
+                onClick={() => setLocation('/quote?destination=A%C3%A9roport+de+Bruxelles-National%2C+Zaventem')}
                 style={{ width: '100%' }}
               >
                 Réserver Navette
@@ -368,68 +419,16 @@ export default function Home() {
         <div className="section-container">
           <h2 className="section-title">Notre Flotte Mercedes</h2>
           <div className="grid grid-cols-3">
-            <div className="card">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/98337968/3Y2Z5bQ2ihvi2iTuitLeub/mercedes-classe-e_b46d5dc9.jpg"
-                alt="Mercedes Classe E"
-                style={{
-                  width: '100%',
-                  height: '200px',
-                  objectFit: 'cover',
-                  borderRadius: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              />
-              <h3 className="card-title">Mercedes Classe E</h3>
-              <p className="card-text">
-                Confortable et élégante pour vos trajets professionnels.
-              </p>
-              <p style={{ marginTop: '1rem', color: 'var(--color-gold)', fontWeight: 600 }}>
-                À partir de 3€/km
-              </p>
-            </div>
-
-            <div className="card">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/98337968/3Y2Z5bQ2ihvi2iTuitLeub/mercedes-classe-s_23596992.jpg"
-                alt="Mercedes Classe S"
-                style={{
-                  width: '100%',
-                  height: '200px',
-                  objectFit: 'cover',
-                  borderRadius: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              />
-              <h3 className="card-title">Mercedes Classe S</h3>
-              <p className="card-text">
-                Le summum du luxe et du confort pour vos trajets VIP.
-              </p>
-              <p style={{ marginTop: '1rem', color: 'var(--color-gold)', fontWeight: 600 }}>
-                À partir de 4€/km
-              </p>
-            </div>
-
-            <div className="card">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/98337968/3Y2Z5bQ2ihvi2iTuitLeub/mercedes-classe-v_1ead2414.jpg"
-                alt="Mercedes Classe V"
-                style={{
-                  width: '100%',
-                  height: '200px',
-                  objectFit: 'cover',
-                  borderRadius: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              />
-              <h3 className="card-title">Mercedes Classe V</h3>
-              <p className="card-text">
-                Spacieuse et pratique pour les groupes et familles.
-              </p>
-              <p style={{ marginTop: '1rem', color: 'var(--color-gold)', fontWeight: 600 }}>
-                À partir de 3,50€/km
-              </p>
-            </div>
+            {vehicles.map((vehicle: any) => (
+              <div key={vehicle.id} className="card">
+                <FleetCarousel images={vehicle.images} name={vehicle.name} />
+                <h3 className="card-title">{vehicle.name}</h3>
+                <p className="card-text">{vehicle.description}</p>
+                <p style={{ marginTop: '1rem', color: 'var(--color-gold)', fontWeight: 600 }}>
+                  À partir de {vehicle.pricePerKm}€/km
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
