@@ -2,8 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
-import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig, getVehicleConfigById } from "./db";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { createQuote, getQuoteById, getAllQuotes, createDisposalRequest, getDisposalRequestById, getAllDisposalRequests, getAllVehicleConfigs, upsertVehicleConfig, deleteVehicleConfig, getVehicleConfigById, updateQuoteStatus, deleteQuote, updateDisposalStatus, deleteDisposal, getQuotesByEmail } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { getAllVehicles } from "@shared/vehicles";
 import { storagePut } from "./storage";
@@ -81,6 +81,56 @@ export const appRouter = router({
       }),
     list: publicProcedure.query(() => getAllQuotes()),
     getById: publicProcedure.input(z.number()).query(({ input }) => getQuoteById(input)),
+    myHistory: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user.email) return [];
+      return getQuotesByEmail(ctx.user.email);
+    }),
+    accept: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const quote = await updateQuoteStatus(input.id, "accepted");
+        if (quote) {
+          const notifLines = [
+            `✅ Devis #${quote.id} ACCEPTÉ`,
+            ``,
+            `👤 Client: ${quote.clientFirstName || ''} ${quote.clientLastName || quote.clientName}`,
+            `📧 Email client: ${quote.clientEmail}`,
+            `📞 Téléphone: ${quote.clientPhone}`,
+            ``,
+            `🚗 Véhicule: ${quote.vehicleId}`,
+            `📍 Départ: ${quote.departureAddress}`,
+            `🏁 Destination: ${quote.destinationAddress}`,
+            `📏 Distance: ${quote.distanceKm} km`,
+            `💶 Prix: ${quote.estimatedPrice}€`,
+            ``,
+            `⚠️ Veuillez contacter le client par email (${quote.clientEmail}) pour lui envoyer le lien de paiement.`,
+          ];
+          await notifyOwner({
+            title: `Devis accepté - ${quote.clientFirstName || quote.clientName} (${quote.clientEmail})`,
+            content: notifLines.join('\n'),
+          }).catch(() => null);
+        }
+        return { success: true, quote };
+      }),
+    reject: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const quote = await getQuoteById(input.id);
+        await deleteQuote(input.id);
+        if (quote) {
+          await notifyOwner({
+            title: `Devis rejeté - ${quote.clientFirstName || quote.clientName}`,
+            content: `Le devis #${quote.id} de ${quote.clientEmail} a été rejeté et supprimé.`,
+          }).catch(() => null);
+        }
+        return { success: true };
+      }),
+    markCompleted: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const quote = await updateQuoteStatus(input.id, "completed");
+        return { success: true, quote };
+      }),
   }),
   
   disposalRequests: router({
@@ -123,6 +173,46 @@ export const appRouter = router({
       }),
     list: publicProcedure.query(() => getAllDisposalRequests()),
     getById: publicProcedure.input(z.number()).query(({ input }) => getDisposalRequestById(input)),
+    accept: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const disposal = await updateDisposalStatus(input.id, "confirmed");
+        if (disposal) {
+          await notifyOwner({
+            title: `Mise à disposition confirmée - ${disposal.clientName} (${disposal.clientEmail})`,
+            content: [
+              `✅ Mise à disposition #${disposal.id} CONFIRMÉE`,
+              `👤 Client: ${disposal.clientName}`,
+              `📧 Email client: ${disposal.clientEmail}`,
+              `📞 Téléphone: ${disposal.clientPhone}`,
+              `⏱ Durée: ${disposal.durationHours}h`,
+              `💶 Prix: ${(disposal.totalPrice / 100).toFixed(2)}€`,
+              ``,
+              `⚠️ Veuillez contacter le client par email (${disposal.clientEmail}) pour lui envoyer le lien de paiement.`,
+            ].join('\n'),
+          }).catch(() => null);
+        }
+        return { success: true, disposal };
+      }),
+    reject: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const disposal = await getDisposalRequestById(input.id);
+        await deleteDisposal(input.id);
+        if (disposal) {
+          await notifyOwner({
+            title: `Mise à disposition rejetée - ${disposal.clientName}`,
+            content: `La mise à disposition #${disposal.id} de ${disposal.clientEmail} a été rejetée et supprimée.`,
+          }).catch(() => null);
+        }
+        return { success: true };
+      }),
+    markCompleted: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const disposal = await updateDisposalStatus(input.id, "completed");
+        return { success: true, disposal };
+      }),
   }),
 
   vehicles: router({

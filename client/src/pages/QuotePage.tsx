@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { ChevronLeft, ChevronRight, MapPin, DollarSign, Navigation, Loader2 } from 'lucide-react';
 import AddressAutocomplete from '@/components/AddressAutocomplete';
-import { getAllVehicles, calculateQuotePrice } from '@shared/vehicles';
-
-const vehicles = getAllVehicles();
 
 interface Place {
   label: string;
@@ -16,11 +13,15 @@ interface Place {
   lon: number;
 }
 
-function VehicleCarousel({ images, vehicleName }: { images: readonly string[]; vehicleName: string }) {
+function VehicleCarousel({ images, vehicleName }: { images: string[]; vehicleName: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const prev = () => setCurrentIndex(i => (i - 1 + images.length) % images.length);
   const next = () => setCurrentIndex(i => (i + 1) % images.length);
+
+  if (!images || images.length === 0) {
+    return <div style={{ width: '100%', aspectRatio: '16/9', background: '#222', borderRadius: '0.5rem' }} />;
+  }
 
   return (
     <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '0.5rem', overflow: 'hidden', background: '#000' }}>
@@ -80,7 +81,8 @@ function VehicleCarousel({ images, vehicleName }: { images: readonly string[]; v
 
 export default function QuotePage() {
   const [, navigate] = useLocation();
-  const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || 'classe-e');
+  const { data: vehicles = [] } = trpc.vehicles.list.useQuery();
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [departurePlace, setDeparturePlace] = useState<Place | null>(null);
@@ -95,10 +97,34 @@ export default function QuotePage() {
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // Read URL search params to pre-fill destination
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const dest = params.get('destination');
+    if (dest) setDestination(dest);
+  }, []);
+
+  // Set default vehicle when list loads
+  useEffect(() => {
+    if (vehicles.length > 0 && !selectedVehicleId) {
+      setSelectedVehicleId((vehicles[0] as any).id);
+    }
+  }, [vehicles, selectedVehicleId]);
+
   const createQuoteMutation = trpc.quotes.create.useMutation();
 
-  const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId) || vehicles[0];
-  const estimatedPrice = distance !== null && selectedVehicle ? calculateQuotePrice(selectedVehicleId, distance) : null;
+  const selectedVehicle = vehicles.length > 0
+    ? ((vehicles as any[]).find((v: any) => v.id === selectedVehicleId) || (vehicles as any[])[0])
+    : null;
+
+  const calculateEstimatedPrice = (vehicleId: string, distanceKm: number): number | null => {
+    const vehicle = (vehicles as any[]).find((v: any) => v.id === vehicleId);
+    if (!vehicle) return null;
+    const distancePrice = Math.max(distanceKm, vehicle.minDistance || 10) * vehicle.pricePerKm;
+    return Math.round(Math.max(distancePrice, vehicle.pricePerHour) * 100) / 100;
+  };
+
+  const estimatedPrice = distance !== null && selectedVehicle ? calculateEstimatedPrice(selectedVehicleId, distance) : null;
 
   const calculateDistance = async () => {
     if (!departurePlace || !destinationPlace) {
@@ -201,7 +227,7 @@ export default function QuotePage() {
             1. Choisissez votre véhicule
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-            {vehicles.map(vehicle => (
+            {(vehicles as any[]).map((vehicle: any) => (
               <div
                 key={vehicle.id}
                 onClick={() => setSelectedVehicleId(vehicle.id)}
@@ -219,7 +245,7 @@ export default function QuotePage() {
                 {selectedVehicleId === vehicle.id && (
                   <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', background: '#d4af37', borderRadius: '50%', width: '1.5rem', height: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '0.75rem', fontWeight: 900 }}>✓</div>
                 )}
-                <VehicleCarousel images={vehicle.images} vehicleName={vehicle.name} />
+                <VehicleCarousel images={vehicle.images || []} vehicleName={vehicle.name} />
                 <div style={{ marginTop: '1rem' }}>
                   <h3 style={{ color: '#ffffff', fontWeight: 700, margin: '0 0 0.25rem', fontSize: '1rem' }}>{vehicle.name}</h3>
                   <p style={{ color: '#888888', fontSize: '0.8rem', margin: '0 0 0.75rem' }}>{vehicle.category}</p>
@@ -360,7 +386,7 @@ export default function QuotePage() {
 
               <div style={{ marginBottom: '1.25rem' }}>
                 <img
-                  src={selectedVehicle?.images?.[0] as string || selectedVehicle?.image}
+                  src={selectedVehicle?.images?.[0] || ''}
                   alt={selectedVehicle?.name}
                   style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '0.5rem', marginBottom: '0.75rem' }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

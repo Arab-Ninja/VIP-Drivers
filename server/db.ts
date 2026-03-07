@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, Quote, InsertQuote, quotes, DisposalRequest, InsertDisposalRequest, disposalRequests, VehicleConfig, InsertVehicleConfig, vehicleConfigs } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -212,4 +212,67 @@ export async function deleteVehicleConfig(vehicleId: string): Promise<void> {
     console.error("[Database] Failed to delete vehicle config:", error);
     throw error;
   }
+}
+
+export async function updateQuoteStatus(id: number, status: Quote["status"]): Promise<Quote | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    await db.update(quotes).set({ status }).where(eq(quotes.id, id));
+    return getQuoteById(id);
+  } catch (error) {
+    console.error("[Database] Failed to update quote status:", error);
+    return null;
+  }
+}
+
+export async function deleteQuote(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete quote: database not available");
+    return;
+  }
+
+  try {
+    await db.delete(quotes).where(eq(quotes.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to delete quote:", error);
+    throw error;
+  }
+}
+
+export async function updateDisposalStatus(id: number, status: DisposalRequest["status"]): Promise<DisposalRequest | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    await db.update(disposalRequests).set({ status }).where(eq(disposalRequests.id, id));
+    return getDisposalRequestById(id);
+  } catch (error) {
+    console.error("[Database] Failed to update disposal status:", error);
+    return null;
+  }
+}
+
+export async function deleteDisposal(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete disposal: database not available");
+    return;
+  }
+
+  try {
+    await db.delete(disposalRequests).where(eq(disposalRequests.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to delete disposal:", error);
+    throw error;
+  }
+}
+
+export async function getQuotesByEmail(email: string): Promise<Quote[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(quotes).where(eq(quotes.clientEmail, email)).orderBy(desc(quotes.createdAt));
 }
