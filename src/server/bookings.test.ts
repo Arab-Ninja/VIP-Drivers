@@ -10,7 +10,12 @@ import {
   users,
   vehicleCategories,
 } from "@/db/schema";
-import { claimBooking, completeBooking, markBookingPaid } from "@/server/bookings";
+import {
+  claimBooking,
+  completeBooking,
+  markBookingPaid,
+  getAvailableRides,
+} from "@/server/bookings";
 import { generateReference } from "@/lib/utils";
 
 /**
@@ -262,5 +267,36 @@ describe("marking a booking paid", () => {
     ]);
 
     expect(results.filter(Boolean)).toHaveLength(1);
+  });
+});
+
+describe("the available-rides board", () => {
+  it("shows pending and confirmed rides that nobody has taken", async () => {
+    const pending = await createBooking({ status: "pending", paymentStatus: "unpaid" });
+    const confirmed = await createBooking();
+    const taken = await createBooking();
+    const completed = await createBooking({ status: "completed" });
+    const cancelled = await createBooking({ status: "cancelled" });
+
+    await claimBooking(taken.id, ids.driverA);
+
+    const board = await getAvailableRides(200);
+    const visible = new Set(board.map((r) => r.booking.id));
+
+    expect(visible.has(pending.id)).toBe(true);
+    expect(visible.has(confirmed.id)).toBe(true);
+    // Already assigned, so no longer available to anyone else.
+    expect(visible.has(taken.id)).toBe(false);
+    expect(visible.has(completed.id)).toBe(false);
+    expect(visible.has(cancelled.id)).toBe(false);
+  });
+
+  it("is ordered soonest first", async () => {
+    const later = await createBooking({ scheduledAt: new Date(Date.now() + 20 * 86_400_000) });
+    const sooner = await createBooking({ scheduledAt: new Date(Date.now() + 2 * 86_400_000) });
+
+    const board = await getAvailableRides(200);
+    const ids_ = board.map((r) => r.booking.id);
+    expect(ids_.indexOf(sooner.id)).toBeLessThan(ids_.indexOf(later.id));
   });
 });

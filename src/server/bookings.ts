@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, isNull, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -262,8 +262,14 @@ export async function completeBooking(
 export type BoardBooking = Awaited<ReturnType<typeof getAvailableRides>>[number];
 
 /**
- * The drivers' "Available rides" board: confirmed and paid rides that no
- * chauffeur has taken yet, soonest first.
+ * The drivers' "Available rides" board: every pending or confirmed ride that
+ * no chauffeur has taken yet, soonest first.
+ *
+ * Pending rides are shown so partners can see demand coming, but they are not
+ * claimable — a pending booking has not been paid for, and letting a driver
+ * commit to one would have them hold a slot for a ride that may never be
+ * confirmed. `claimBooking` enforces that; this query only decides what is
+ * visible.
  */
 export async function getAvailableRides(limit = 50) {
   return db
@@ -277,7 +283,12 @@ export async function getAvailableRides(limit = 50) {
     })
     .from(bookings)
     .innerJoin(vehicleCategories, eq(bookings.vehicleCategoryId, vehicleCategories.id))
-    .where(and(eq(bookings.status, "confirmed"), isNull(bookings.driverId)))
+    .where(
+      and(
+        inArray(bookings.status, ["pending", "confirmed"]),
+        isNull(bookings.driverId),
+      ),
+    )
     .orderBy(asc(bookings.scheduledAt))
     .limit(limit);
 }

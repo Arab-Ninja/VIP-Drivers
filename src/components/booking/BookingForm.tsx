@@ -275,7 +275,7 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
   return (
     <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
       {/* ------------------ left: the options ------------------ */}
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-6">
         {/* Service */}
         <Card className="p-6 lg:p-7">
           <h2 className="eyebrow">{t.booking.step1}</h2>
@@ -431,7 +431,11 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
                 >
                   {vehicle.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={vehicle.imageUrl} alt="" className="h-12 w-24 shrink-0 object-contain" />
+                    <img
+                      src={vehicle.imageUrl}
+                      alt=""
+                      className="hidden h-12 w-24 shrink-0 object-contain sm:block"
+                    />
                   ) : null}
 
                   <span className="min-w-0 flex-1">
@@ -453,7 +457,7 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
                     </span>
                   </span>
 
-                  <span className="shrink-0 text-right">
+                  <span className="min-w-0 shrink text-right">
                     <span className={cn("block text-sm", selected ? "text-gold-300" : "text-ink-200")}>
                       {rate}
                     </span>
@@ -575,7 +579,7 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
       </div>
 
       {/* ------------------ right: the live preview ------------------ */}
-      <aside className="lg:sticky lg:top-24">
+      <aside className="min-w-0 lg:sticky lg:top-24">
         {/* Desktop panel */}
         <Card className="hidden p-6 lg:block">
           <h2 className="font-display text-2xl text-ink-100">{t.booking.summary}</h2>

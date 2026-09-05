@@ -44,6 +44,7 @@ export default async function DriverAvailablePage() {
   }
 
   const rides = await getAvailableRides();
+  const claimable = rides.filter((r) => r.booking.status === "confirmed");
   const approved = profile?.status === "approved" || user.role === "admin";
   const commissionBps = profile?.commissionBps ?? 2000;
 
@@ -52,7 +53,7 @@ export default async function DriverAvailablePage() {
       title={t.driver.available}
       subtitle={t.driver.availableHint}
       activeHref="/driver"
-      tabs={driverTabs(t, rides.length || undefined)}
+      tabs={driverTabs(t, claimable.length || undefined)}
     >
       {profile ? <DriverStatusNotice status={profile.status} t={t} /> : null}
 
@@ -82,7 +83,15 @@ export default async function DriverAvailablePage() {
                       ? row.booking.notes.slice(0, 120)
                       : null
                 }
-                action={approved ? <ClaimButton bookingId={row.booking.id} /> : null}
+                action={
+                  // A pending ride is visible so partners can see demand
+                  // coming, but it cannot be taken until the client has paid.
+                  row.booking.status !== "confirmed" ? (
+                    <span className="text-xs text-ink-500">{t.status.pendingHint}</span>
+                  ) : approved ? (
+                    <ClaimButton bookingId={row.booking.id} />
+                  ) : null
+                }
               />
             );
           })}

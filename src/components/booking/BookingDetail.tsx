@@ -135,7 +135,7 @@ export function BookingDetail({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-6">
         <Card className="p-6 lg:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -242,7 +242,7 @@ export function BookingDetail({
         </Card>
       </div>
 
-      <aside className="space-y-4 lg:sticky lg:top-24">
+      <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
         <Card className="p-6">
           <h2 className="font-display text-2xl text-ink-100">{t.booking.summary}</h2>
 

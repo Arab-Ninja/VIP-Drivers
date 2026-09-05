@@ -55,7 +55,7 @@ export default async function AdminBookingDetailPage({
       }
     >
       <div className="grid gap-6 xl:grid-cols-[1fr_360px] xl:items-start">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <BookingDetail
             booking={booking}
             vehicleName={vehicle.name}
