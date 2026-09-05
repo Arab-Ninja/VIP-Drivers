@@ -10,7 +10,9 @@
 function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(
-      `Missing required environment variable ${name}. Copy .env.example to .env.local and fill it in.`,
+      `Missing required environment variable ${name}. ` +
+        "Set it in your hosting provider's environment variables (Vercel: " +
+        "Settings -> Environment Variables), or locally in .env.local — see .env.example.",
     );
   }
   return value;
@@ -26,13 +28,18 @@ export const env = {
     return required("DATABASE_URL", process.env.DATABASE_URL);
   },
 
-  get authSecret(): string {
-    // Outside production a stable throwaway secret keeps `next dev` usable
-    // before the operator has generated a real one.
-    return (
-      process.env.AUTH_SECRET ??
-      (isProduction ? required("AUTH_SECRET", undefined) : "dev-only-insecure-secret-change-me")
-    );
+  /**
+   * Deliberately returns undefined rather than throwing when unset in
+   * production. This value is read while the Auth.js config is constructed,
+   * which happens at module load — and therefore during `next build`, where
+   * no runtime secret exists yet. Auth.js raises its own clear error on the
+   * first request instead, which fails the request rather than the build.
+   *
+   * Outside production a stable throwaway keeps `next dev` usable before the
+   * operator has generated a real one.
+   */
+  get authSecret(): string | undefined {
+    return process.env.AUTH_SECRET ?? (isProduction ? undefined : "dev-only-insecure-secret-change-me");
   },
 
   appUrl:

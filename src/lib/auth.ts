@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@/db";
+import { db, getDb } from "@/db";
 import { users, accounts, sessions, verificationTokens } from "@/db/schema";
 import type { UserRole } from "@/db/schema";
 import { env } from "@/lib/env";
@@ -49,8 +49,16 @@ export function verifyPassword(password: string, hash: string): Promise<boolean>
  */
 const DUMMY_HASH = "$2a$12$C6UzMDM.H6dfI/f/IKcEe.7pQ2Zk5G1u2Cq2b4Z5rQ8mFq3vHqvSa";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: DrizzleAdapter(db, {
+/**
+ * Auth.js is configured through a factory rather than a literal so that none
+ * of this runs at module load — and therefore not during `next build`, where
+ * no database URL or secret exists yet. Auth.js calls it per request.
+ *
+ * The adapter is handed the real Drizzle instance rather than the lazy proxy,
+ * because it detects the SQL dialect with `instanceof`.
+ */
+export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
+  adapter: DrizzleAdapter(getDb(), {
     usersTable: users,
     accountsTable: accounts,
     sessionsTable: sessions,
@@ -165,7 +173,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return !row?.blockedAt;
     },
   },
-});
+}));
 
 /* ------------------------------------------------------------------ */
 /* Server-side guards                                                  */

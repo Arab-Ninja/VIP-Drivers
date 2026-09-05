@@ -44,6 +44,10 @@ Keep this tab open — you paste that string in Part 2.
 
 5. Click **Deploy** and wait about a minute.
 
+> Optional: under **Settings → Functions**, set the region to **Frankfurt
+> (fra1)**. It is the closest to Brussels and shaves latency off every page.
+> The default works fine, so skip it if the option is not offered on your plan.
+
 ### Create the tables and load the fleet
 
 On your own computer, in the project folder:
@@ -293,6 +297,21 @@ quality.
 
 **"Too many connections" from the database.** You are using the unpooled Neon
 string. Switch to the pooled one (its host contains `-pooler`).
+
+**The Vercel build fails.** The build must never need your runtime secrets —
+it compiles the code, it does not run your app. If a build error mentions a
+missing environment variable, that is a bug rather than a configuration
+problem: the app is written so that `next build` succeeds with no variables at
+all, and a missing one surfaces as a clear error on the first request instead.
+Open the full build log, and check the failing step is not something else
+entirely (a TypeScript error, or a dependency that failed to install).
+
+**Everything 500s right after deploying.** The build succeeds without
+environment variables, so the first sign that one is missing is at runtime.
+Open **Vercel → your deployment → Runtime Logs**; the error names the exact
+variable. `DATABASE_URL` and `AUTH_SECRET` are the two the app cannot run
+without. After adding a variable you must **redeploy** — existing deployments
+keep the values they were built with.
 
 **A price looks wrong.** Open the booking: the full breakdown is stored on it,
 showing the metered fare, any minimum-fare adjustment, each surcharge and the

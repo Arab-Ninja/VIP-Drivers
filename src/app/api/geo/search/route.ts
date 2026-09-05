@@ -3,6 +3,9 @@ import { searchAddresses } from "@/server/routing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Upstream geocoding, routing and Stripe calls can be slow; the platform
+// default of 10s is not always enough.
+export const maxDuration = 30;
 
 /**
  * Address autocomplete proxy. Exists so the Mapbox token stays on the server

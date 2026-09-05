@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { eq, inArray } from "drizzle-orm";
 
-import { db, sql } from "@/db";
+import { db, closeDb } from "@/db";
 import {
   bookings,
   bookingEvents,
@@ -111,7 +111,7 @@ afterAll(async () => {
   await db.delete(driverProfiles).where(inArray(driverProfiles.userId, [ids.driverA, ids.driverB]));
   await db.delete(users).where(inArray(users.id, [ids.client, ids.driverA, ids.driverB]));
   await db.delete(vehicleCategories).where(eq(vehicleCategories.id, ids.vehicle));
-  await sql.end();
+  await closeDb();
 });
 
 beforeEach(() => {
