@@ -15,6 +15,11 @@ export type DashboardTab = {
  * One horizontal tab strip rather than a sidebar, because it collapses to a
  * scrollable row on a phone without a drawer.
  */
+/** True when `href` is an ancestor route of `pathname`. */
+function isPrefixOf(href: string, pathname: string): boolean {
+  return href !== "/" && pathname.startsWith(`${href}/`);
+}
+
 export function DashboardShell({
   title,
   subtitle,
@@ -30,6 +35,8 @@ export function DashboardShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const exactMatch = tabs.some((tab) => tab.href === activeHref);
+
   return (
     <>
       <div className="border-b border-ink-800 bg-ink-900/40">
@@ -44,9 +51,10 @@ export function DashboardShell({
 
           <nav className="-mx-5 mt-8 flex gap-1 overflow-x-auto px-5 lg:mx-0 lg:px-0" aria-label={title}>
             {tabs.map((tab) => {
-              const active =
-                tab.href === activeHref ||
-                (tab.href !== "/" && activeHref.startsWith(`${tab.href}/`));
+              // Prefix matching is only a fallback for a nested route no tab
+              // names exactly. Without that guard "/driver" would light up
+              // alongside "/driver/earnings", marking two tabs current.
+              const active = exactMatch ? tab.href === activeHref : isPrefixOf(tab.href, activeHref);
               return (
                 <Link
                   key={tab.href}
