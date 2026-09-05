@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- Luxury palette: dominant black, dark-golden accent ---- */
+  --color-ink-950: #050506;
+  --color-ink-900: #0a0a0c;
+  --color-ink-850: #101013;
+  --color-ink-800: #16161a;
+  --color-ink-700: #1e1e23;
+  --color-ink-600: #2a2a31;
+  --color-ink-500: #3a3a43;
+  --color-ink-400: #55555f;
+  --color-ink-300: #8a8a94;
+  --color-ink-200: #b9b9c0;
+  --color-ink-100: #e4e4e7;
+
+  --color-gold-50: #faf5e8;
+  --color-gold-100: #f2e5c4;
+  --color-gold-200: #e3cf96;
+  --color-gold-300: #d4b76b;
+  --color-gold-400: #c8a45d;
+  --color-gold-500: #b8933e;
+  --color-gold-600: #9a7830;
+  --color-gold-700: #7a5e26;
+  --color-gold-800: #55411a;
+  --color-gold-900: #33270f;
+
+  --color-success: #3f9a6a;
+  --color-warning: #c9922e;
+  --color-danger: #c0473f;
+  --color-info: #4a7fb5;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, "Times New Roman", serif;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-lift: 0 1px 2px rgb(0 0 0 / 0.6), 0 12px 32px -12px rgb(0 0 0 / 0.8);
+  --shadow-gold: 0 0 0 1px rgb(200 164 93 / 0.22), 0 18px 44px -20px rgb(200 164 93 / 0.3);
+
+  --ease-lux: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-ink-700);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-ink-100);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: var(--color-gold-500);
+    color: var(--color-ink-950);
+  }
+
+  /* Slim, unobtrusive scrollbar in keeping with the dark shell */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--color-ink-900); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-600);
+    border-radius: 999px;
+    border: 3px solid var(--color-ink-900);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-gold-700); }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-400);
+    outline-offset: 2px;
+  }
+
+  input, textarea, select { color-scheme: dark; }
+}
+
+@layer components {
+  /* Hairline gold rule used to separate major sections */
+  .rule-gold {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-gold-600) 20%,
+      var(--color-gold-400) 50%,
+      var(--color-gold-600) 80%,
+      transparent
+    );
+    height: 1px;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #e3cf96 0%, #c8a45d 45%, #9a7830 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Eyebrow label above section headings */
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--color-gold-400);
+  }
+
+  .surface {
+    background: linear-gradient(180deg, var(--color-ink-850), var(--color-ink-900));
+    border: 1px solid var(--color-ink-700);
+  }
+
+  .surface-hover {
+    transition: border-color 0.4s var(--ease-lux), transform 0.4s var(--ease-lux), box-shadow 0.4s var(--ease-lux);
+  }
+  .surface-hover:hover {
+    border-color: color-mix(in srgb, var(--color-gold-500) 45%, transparent);
+    box-shadow: var(--shadow-gold);
+  }
+}
+
+@layer utilities {
+  .animate-rise {
+    animation: rise 0.8s var(--ease-lux) both;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .animate-fade {
+    animation: fade 0.6s var(--ease-lux) both;
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-rise, .animate-fade { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+}
