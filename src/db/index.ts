@@ -6,10 +6,12 @@ import { env } from "@/lib/env";
 /**
  * Serverless functions are recycled constantly, and Next's dev server reloads
  * modules on every edit. Both would open a fresh pool each time and exhaust
- * the database's connection limit, so the client is cached on globalThis.
+ * the database's connection limit, so the client (and the drizzle instance
+ * built on top of it) is cached on globalThis.
  */
 const globalForDb = globalThis as unknown as {
   vipDriversSql?: ReturnType<typeof postgres>;
+  vipDriversDb?: ReturnType<typeof drizzle<typeof schema>>;
 };
 
 function createClient() {
@@ -23,9 +25,50 @@ function createClient() {
   });
 }
 
-const sql = globalForDb.vipDriversSql ?? createClient();
-if (!env.isProduction) globalForDb.vipDriversSql = sql;
+/**
+ * Both the client and drizzle instance are created lazily, on first use, and
+ * then cached on globalThis for the lifetime of the process (dev hot-reloads
+ * pick the cache back up; production isolates never see a second call, but
+ * caching here keeps the logic uniform). Next.js evaluates every module
+ * reachable from the root layout while collecting page data at build time
+ * (e.g. for /_not-found), even for routes that never touch the database, so
+ * connecting eagerly here would make `DATABASE_URL` a hard requirement just
+ * to run `next build`.
+ */
+function getClient(): ReturnType<typeof postgres> {
+  if (!globalForDb.vipDriversSql) globalForDb.vipDriversSql = createClient();
+  return globalForDb.vipDriversSql;
+}
 
-export const db = drizzle(sql, { schema });
-export { sql, schema };
+function getDb() {
+  if (!globalForDb.vipDriversDb) globalForDb.vipDriversDb = drizzle(getClient(), { schema });
+  return globalForDb.vipDriversDb;
+}
+
+function makeLazyProxy<T extends object>(get: () => T): T {
+  return new Proxy(function () {} as unknown as T, {
+    get(_target, prop, receiver) {
+      return Reflect.get(get() as object, prop, receiver);
+    },
+    has(_target, prop) {
+      return Reflect.has(get() as object, prop);
+    },
+    ownKeys(_target) {
+      return Reflect.ownKeys(get() as object);
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      return Reflect.getOwnPropertyDescriptor(get() as object, prop);
+    },
+    getPrototypeOf(_target) {
+      return Reflect.getPrototypeOf(get() as object);
+    },
+    apply(_target, thisArg, args) {
+      return Reflect.apply(get() as unknown as (...a: unknown[]) => unknown, thisArg, args);
+    },
+  });
+}
+
+export const db = makeLazyProxy(getDb);
+export const sql = makeLazyProxy(getClient);
+export { schema };
 export type Database = typeof db;
