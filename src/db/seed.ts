@@ -10,7 +10,7 @@
  */
 import "./load-env";
 import { eq } from "drizzle-orm";
-import { db, sql } from "./index";
+import { db, closeDb } from "./index";
 import {
   users,
   vehicleCategories,
@@ -452,11 +452,11 @@ async function main() {
   }
 
   console.log("\nDone.");
-  await sql.end();
+  await closeDb();
 }
 
 main().catch(async (error) => {
   console.error("Seed failed:", error);
-  await sql.end().catch(() => {});
+  await closeDb().catch(() => {});
   process.exit(1);
 });

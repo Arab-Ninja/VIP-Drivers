@@ -47,3 +47,4 @@ dbg.mjs
 e2e-roles.mjs
 check.mjs
 of.mjs
+prod-smoke.mjs

@@ -10,6 +10,9 @@ import { env } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Upstream geocoding, routing and Stripe calls can be slow; the platform
+// default of 10s is not always enough.
+export const maxDuration = 30;
 
 /**
  * Stripe webhook.
