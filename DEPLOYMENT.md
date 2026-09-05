@@ -15,7 +15,9 @@ addresses, real distances and real prices.
 2. **Create a project**. Name it `vip-drivers`, region **Europe (Frankfurt)** —
    the closest to Brussels.
 3. On the project dashboard, copy the **Connection string**. Make sure the
-   **Pooled connection** toggle is on. It looks like:
+   **Pooled connection** toggle is on. Paste it exactly as Neon gives it —
+   the `channel_binding=require` it appends is a setting for a different
+   Postgres client and the app strips it for you. It looks like:
 
    ```
    postgresql://neondb_owner:xxxx@ep-xxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
