@@ -1,6 +1,7 @@
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { sanitiseConnectionString } from "./connection-string";
 import { env } from "@/lib/env";
 
 export type Database = PostgresJsDatabase<typeof schema>;
@@ -26,7 +27,10 @@ const globalForDb = globalThis as unknown as {
 };
 
 function createClient() {
-  return postgres(env.databaseUrl, {
+  // Providers append client-only parameters (Neon's channel_binding,
+  // Supabase's pgbouncer) that the server would reject; see
+  // ./connection-string.
+  return postgres(sanitiseConnectionString(env.databaseUrl), {
     // Neon and Supabase front Postgres with PgBouncer in transaction mode,
     // which cannot support prepared statements.
     prepare: false,
