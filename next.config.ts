@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Lets a production build run without clobbering the dev server's own
+  // .next directory, which otherwise leaves `next dev` serving 404s for its
+  // chunks until it is restarted.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   images: {
     remotePatterns: [

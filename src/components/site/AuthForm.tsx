@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -42,6 +42,12 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Until React has hydrated, this form has no submit handler, and a native
+  // submit would put the password in the query string and the browser's
+  // history. Disabling the button until then removes that window entirely.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   // Preserved through the whole sign-in round trip so a visitor who was part
   // way through a booking lands back on it.
@@ -188,7 +194,7 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
             </p>
           ) : null}
 
-          <Button type="submit" className="mt-6 w-full" disabled={pending}>
+          <Button type="submit" className="mt-6 w-full" disabled={pending || !hydrated}>
             {pending ? t.common.loading : isSignup ? t.auth.signup : t.auth.login}
             {!pending ? isSignup ? <UserPlus /> : <LogIn /> : null}
           </Button>

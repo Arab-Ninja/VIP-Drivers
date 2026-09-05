@@ -39,3 +39,8 @@ Thumbs.db
 
 # Local dev helpers (not part of the app)
 shot.mjs
+
+# Build output when NEXT_DIST_DIR is used
+/.next-build/
+e2e-booking.mjs
+dbg.mjs
