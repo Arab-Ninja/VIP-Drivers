@@ -34,13 +34,27 @@ Keep this tab open — you paste that string in Part 2.
 2. **Add New → Project**, choose the `VIP-Drivers` repository, and pick the
    branch you want to deploy.
 3. Vercel detects Next.js on its own. Leave every build setting alone.
-4. Open **Environment Variables** and add these three:
+4. Open **Environment Variables** and add exactly these three:
 
    | Name | Value |
    | --- | --- |
    | `DATABASE_URL` | the pooled Neon string from Part 1 |
    | `AUTH_SECRET` | run `openssl rand -base64 32` and paste the result |
    | `ADMIN_EMAILS` | your email address |
+
+   Three things to get right here, because each one silently breaks something:
+
+   - **The names must match exactly.** `AUTH_SECRET`, not `JWT_SECRET` or
+     `SECRET_KEY`. A variable under any other name is simply not read.
+   - **Paste the value only.** No quotes, and no `< >` brackets — those appear
+     in documentation to mark a placeholder and are not part of the value.
+   - **Do not add a variable you have no value for yet.** Leave it out
+     entirely rather than creating it blank. Add Stripe, Google and the rest
+     in the later parts, when you actually have their keys.
+
+   You do **not** need `NEXT_PUBLIC_APP_URL`. Vercel tells the app its own
+   address, and each preview deployment gets its own. Set it only once you
+   have a custom domain (Part 8).
 
 5. Click **Deploy** and wait about a minute.
 
@@ -297,6 +311,11 @@ quality.
 
 **"Too many connections" from the database.** You are using the unpooled Neon
 string. Switch to the pooled one (its host contains `-pooler`).
+
+**A variable seems to be ignored.** Check its name character for character
+against the table above, and check the value has no surrounding quotes or
+`< >` brackets. Then confirm it is enabled for the **Production** environment
+and **redeploy** — a deployment keeps the values it was built with.
 
 **The Vercel build fails.** The build must never need your runtime secrets —
 it compiles the code, it does not run your app. If a build error mentions a
