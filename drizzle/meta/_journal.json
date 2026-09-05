@@ -1,26 +1,12 @@
 {
   "version": "7",
-  "dialect": "mysql",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1772218438570,
-      "tag": "0000_fresh_purifiers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1772218554344,
-      "tag": "0001_greedy_black_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1772839090211,
-      "tag": "0002_big_hellfire_club",
+      "version": "7",
+      "when": 1788617474809,
+      "tag": "0000_init",
       "breakpoints": true
     }
   ]

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-label="Mercedes-Benz Classe E">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b2b31"/>
+      <stop offset="42%" stop-color="#15151a"/>
+      <stop offset="100%" stop-color="#0b0b0e"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c8a45d" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#e3cf96" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c8a45d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a4a55"/>
+      <stop offset="100%" stop-color="#1b1b21"/>
+    </linearGradient>
+    <radialGradient id="ground" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#c8a45d" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#c8a45d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4b76b"/>
+      <stop offset="100%" stop-color="#7a5e26"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="360" cy="252" rx="290" ry="26" fill="url(#ground)"/>
+  <!-- lower body -->
+  <path d="M78 214 C74 186 90 172 122 168 L180 162 C210 130 250 112 316 108 L404 106 C462 108 502 126 536 154 L600 168 C636 176 650 190 648 214 Z"
+        fill="url(#body)" stroke="#3a3a43" stroke-width="1.5"/>
+  <!-- greenhouse -->
+  <path d="M204 160 C232 132 266 118 320 116 L400 115 C450 117 484 132 514 156 Z"
+        fill="url(#glass)" opacity="0.95"/>
+  <!-- window separations -->
+  <path d="M318 116 L318 158 M392 115 L392 157" stroke="#0d0d11" stroke-width="3"/>
+  <!-- shoulder line -->
+  <path d="M110 176 L610 178" stroke="url(#sheen)" stroke-width="2.5" fill="none"/>
+  <!-- sill highlight -->
+  <path d="M150 210 L580 210" stroke="#c8a45d" stroke-opacity="0.28" stroke-width="1.5"/>
+  <!-- lamps -->
+  <path d="M84 190 L118 186 L118 200 L84 202 Z" fill="#e3cf96" opacity="0.9"/>
+  <path d="M642 190 L612 187 L612 200 L642 202 Z" fill="#c0473f" opacity="0.85"/>
+  <!-- door handles -->
+  <rect x="300" y="176" width="26" height="5" rx="2.5" fill="#c8a45d" opacity="0.75"/>
+  <rect x="404" y="176" width="26" height="5" rx="2.5" fill="#c8a45d" opacity="0.75"/>
+  <!-- wheel arches -->
+  <path d="M156 214 a58 58 0 0 1 116 0" fill="#08080a"/>
+  <path d="M454 214 a58 58 0 0 1 116 0" fill="#08080a"/>
+    <circle cx="214" cy="214" r="50" fill="#08080a" stroke="#2a2a31" stroke-width="2"/>
+    <circle cx="214" cy="214" r="29.00" fill="none" stroke="url(#rim)" stroke-width="3"/>
+    <circle cx="214" cy="214" r="10.00" fill="#1a1a20" stroke="#c8a45d" stroke-width="1.2"/>
+    <circle cx="512" cy="214" r="50" fill="#08080a" stroke="#2a2a31" stroke-width="2"/>
+    <circle cx="512" cy="214" r="29.00" fill="none" stroke="url(#rim)" stroke-width="3"/>
+    <circle cx="512" cy="214" r="10.00" fill="#1a1a20" stroke="#c8a45d" stroke-width="1.2"/>
+</svg>

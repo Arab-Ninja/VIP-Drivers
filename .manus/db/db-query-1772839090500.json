@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `vehicleConfigs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`vehicleId` varchar(64) NOT NULL,\n\t`name` varchar(255) NOT NULL,\n\t`category` varchar(255) NOT NULL,\n\t`description` text NOT NULL,\n\t`features` text NOT NULL,\n\t`pricePerKm` int NOT NULL,\n\t`pricePerHour` int NOT NULL,\n\t`minDistance` int NOT NULL,\n\t`images` text NOT NULL,\n\t`active` enum('yes','no') NOT NULL DEFAULT 'yes',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `vehicleConfigs_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `vehicleConfigs_vehicleId_unique` UNIQUE(`vehicleId`)\n);\nALTER TABLE `quotes` ADD `clientFirstName` varchar(128);\nALTER TABLE `quotes` ADD `clientLastName` varchar(128);\nALTER TABLE `quotes` ADD `clientCompany` varchar(255);\nALTER TABLE `quotes` ADD `clientVatNumber` varchar(64);",
-  "command": "drizzle-kit migrate",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 2341
-}

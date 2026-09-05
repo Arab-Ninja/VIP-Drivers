@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" role="img" aria-label="Mercedes-Benz Classe S">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b2b31"/>
+      <stop offset="42%" stop-color="#15151a"/>
+      <stop offset="100%" stop-color="#0b0b0e"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c8a45d" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#e3cf96" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c8a45d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a4a55"/>
+      <stop offset="100%" stop-color="#1b1b21"/>
+    </linearGradient>
+    <radialGradient id="ground" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#c8a45d" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#c8a45d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4b76b"/>
+      <stop offset="100%" stop-color="#7a5e26"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="360" cy="252" rx="300" ry="27" fill="url(#ground)"/>
+  <path d="M68 212 C62 182 80 168 114 163 L172 156 C200 126 240 108 308 104 L418 102 C486 104 528 122 562 152 L616 164 C650 172 662 188 658 212 Z"
+        fill="url(#body)" stroke="#3a3a43" stroke-width="1.5"/>
+  <path d="M196 154 C226 124 262 112 320 110 L414 109 C468 111 506 126 538 152 Z" fill="url(#glass)"/>
+  <path d="M320 110 L320 152 M402 109 L402 151" stroke="#0d0d11" stroke-width="3"/>
+  <!-- long, unbroken shoulder line: the S-Class cue -->
+  <path d="M96 172 L634 174" stroke="url(#sheen)" stroke-width="3" fill="none"/>
+  <path d="M120 190 L620 192" stroke="#c8a45d" stroke-opacity="0.22" stroke-width="1.2"/>
+  <path d="M140 208 L600 208" stroke="#c8a45d" stroke-opacity="0.3" stroke-width="1.8"/>
+  <path d="M74 186 L112 182 L112 198 L74 200 Z" fill="#e3cf96"/>
+  <path d="M654 186 L620 183 L620 198 L654 200 Z" fill="#c0473f" opacity="0.9"/>
+  <rect x="296" y="172" width="30" height="5" rx="2.5" fill="#c8a45d" opacity="0.8"/>
+  <rect x="412" y="172" width="30" height="5" rx="2.5" fill="#c8a45d" opacity="0.8"/>
+  <path d="M148 212 a60 60 0 0 1 120 0" fill="#08080a"/>
+  <path d="M468 212 a60 60 0 0 1 120 0" fill="#08080a"/>
+    <circle cx="208" cy="212" r="52" fill="#08080a" stroke="#2a2a31" stroke-width="2"/>
+    <circle cx="208" cy="212" r="30.16" fill="none" stroke="url(#rim)" stroke-width="3"/>
+    <circle cx="208" cy="212" r="10.40" fill="#1a1a20" stroke="#c8a45d" stroke-width="1.2"/>
+    <circle cx="528" cy="212" r="52" fill="#08080a" stroke="#2a2a31" stroke-width="2"/>
+    <circle cx="528" cy="212" r="30.16" fill="none" stroke="url(#rim)" stroke-width="3"/>
+    <circle cx="528" cy="212" r="10.40" fill="#1a1a20" stroke="#c8a45d" stroke-width="1.2"/>
+</svg>
