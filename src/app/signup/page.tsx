@@ -14,7 +14,7 @@ export default async function SignupPage({
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
   const user = await getCurrentUser();
-  if (user) redirect((await searchParams).callbackUrl ?? "/account");
+  if (user) redirect((await searchParams).callbackUrl ?? "/dashboard");
 
   return (
     <div className="flex min-h-[calc(100dvh-5rem)] items-center justify-center px-5 py-16">

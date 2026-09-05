@@ -44,3 +44,4 @@ shot.mjs
 /.next-build/
 e2e-booking.mjs
 dbg.mjs
+e2e-roles.mjs

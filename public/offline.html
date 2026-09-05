@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hors ligne · VIP Drivers</title>
+    <style>
+      :root { color-scheme: dark; }
+      body {
+        margin: 0; min-height: 100dvh; display: grid; place-items: center;
+        background: #050506; color: #e4e4e7; text-align: center; padding: 2rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      .plate {
+        display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 1.75rem;
+        border: 1px solid rgba(200,164,93,.5);
+        background: linear-gradient(135deg, #16161a, #050506);
+        font-family: Georgia, serif; font-size: 1.1rem; color: #c8a45d;
+      }
+      h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 300; font-size: 1.75rem; margin: 0 0 .75rem; }
+      p { color: #8a8a94; font-size: .9rem; line-height: 1.7; max-width: 30ch; margin: 0 auto 2rem; }
+      a {
+        display: inline-block; padding: .8rem 1.75rem; text-decoration: none;
+        background: linear-gradient(180deg, #d4b76b, #b8933e); color: #050506;
+        font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="plate">VD</div>
+      <h1>Connexion perdue</h1>
+      <p>Vous n'êtes plus connecté à Internet. Vos réservations vous attendent dès le retour du réseau.</p>
+      <a href="/" onclick="location.reload(); return false;">Réessayer</a>
+    </main>
+  </body>
+</html>

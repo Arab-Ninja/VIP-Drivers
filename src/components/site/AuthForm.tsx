@@ -50,8 +50,9 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
   useEffect(() => setHydrated(true), []);
 
   // Preserved through the whole sign-in round trip so a visitor who was part
-  // way through a booking lands back on it.
-  const callbackUrl = params.get("callbackUrl") || "/account";
+  // way through a booking lands back on it. With no explicit destination,
+  // /dashboard routes the person to the area their role belongs to.
+  const callbackUrl = params.get("callbackUrl") || "/dashboard";
   const isSignup = mode === "signup";
 
   async function doCredentialsSignIn(email: string, password: string) {

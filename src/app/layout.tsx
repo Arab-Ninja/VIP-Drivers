@@ -10,6 +10,7 @@ import { I18nProvider } from "@/i18n/client";
 import { getCompanyInfo } from "@/lib/settings";
 import { Header, type HeaderUser } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { env } from "@/lib/env";
 
 const inter = Inter({
@@ -85,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             >
               {locale === "fr" ? "Aller au contenu" : "Skip to content"}
             </a>
+            <ServiceWorkerRegistrar />
             <Header user={user} />
             <main id="main" className="pt-20">
               {children}
