@@ -27,13 +27,17 @@ function createClient() {
 
 /**
  * Both the client and drizzle instance are created lazily, on first use, and
- * then cached on globalThis for the lifetime of the process (dev hot-reloads
- * pick the cache back up; production isolates never see a second call, but
- * caching here keeps the logic uniform). Next.js evaluates every module
- * reachable from the root layout while collecting page data at build time
- * (e.g. for /_not-found), even for routes that never touch the database, so
- * connecting eagerly here would make `DATABASE_URL` a hard requirement just
- * to run `next build`.
+ * then cached on globalThis. Next.js evaluates every module reachable from
+ * the root layout while collecting page data at build time (e.g. for
+ * /_not-found), even for routes that never touch the database, so connecting
+ * eagerly here would make `DATABASE_URL` a hard requirement just to run
+ * `next build`.
+ *
+ * Caching on globalThis (rather than only in a module-scope variable) is
+ * done unconditionally, including in production: Vercel/Node serverless
+ * runtimes reuse warm containers across invocations within the same
+ * process, so this still avoids opening a fresh pool per request, exactly
+ * like the previous eager-init version did.
  */
 function getClient(): ReturnType<typeof postgres> {
   if (!globalForDb.vipDriversSql) globalForDb.vipDriversSql = createClient();
@@ -45,8 +49,8 @@ function getDb() {
   return globalForDb.vipDriversDb;
 }
 
-function makeLazyProxy<T extends object>(get: () => T): T {
-  return new Proxy(function () {} as unknown as T, {
+function baseLazyHandler<T extends object>(get: () => T): ProxyHandler<T> {
+  return {
     get(_target, prop, receiver) {
       return Reflect.get(get() as object, prop, receiver);
     },
@@ -62,13 +66,27 @@ function makeLazyProxy<T extends object>(get: () => T): T {
     getPrototypeOf(_target) {
       return Reflect.getPrototypeOf(get() as object);
     },
+  };
+}
+
+function makeLazyProxy<T extends object>(get: () => T): T {
+  return new Proxy({} as T, baseLazyHandler(get));
+}
+
+/** Like {@link makeLazyProxy}, but the result is also callable, for `sql` itself being a tagged-template function. */
+function makeLazyCallableProxy<T extends (...args: never[]) => unknown>(get: () => T): T {
+  return new Proxy(function () {} as unknown as T, {
+    ...baseLazyHandler(get),
     apply(_target, thisArg, args) {
-      return Reflect.apply(get() as unknown as (...a: unknown[]) => unknown, thisArg, args);
+      return Reflect.apply(get(), thisArg, args);
+    },
+    construct(_target, args) {
+      return Reflect.construct(get() as unknown as new (...a: unknown[]) => object, args);
     },
   });
 }
 
 export const db = makeLazyProxy(getDb);
-export const sql = makeLazyProxy(getClient);
+export const sql = makeLazyCallableProxy(getClient);
 export { schema };
 export type Database = typeof db;
