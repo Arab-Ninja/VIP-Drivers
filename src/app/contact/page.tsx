@@ -17,13 +17,19 @@ export default async function ContactPage() {
   const { t, locale } = await getTranslations();
   const [company, user] = await Promise.all([getCompanyInfo(), getCurrentUser()]);
 
+  // The phone card only exists when the operator publishes a number: an empty
+  // one would render a dead tel: link.
   const cards = [
-    {
-      icon: Phone,
-      title: t.contact.callUs,
-      value: company.phone,
-      href: `tel:${company.phone.replace(/\s/g, "")}`,
-    },
+    ...(company.phone
+      ? [
+          {
+            icon: Phone,
+            title: t.contact.callUs,
+            value: company.phone,
+            href: `tel:${company.phone.replace(/\s/g, "")}`,
+          },
+        ]
+      : []),
     {
       icon: Mail,
       title: t.contact.writeUs,

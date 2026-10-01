@@ -78,12 +78,14 @@ export function Footer({
                   {company.postalCode} {company.city}, {company.country}
                 </span>
               </li>
-              <li className="flex gap-3">
-                <Phone className="mt-0.5 size-4 shrink-0 text-gold-600" aria-hidden />
-                <a href={`tel:${company.phone.replace(/\s/g, "")}`} className="hover:text-gold-300">
-                  {company.phone}
-                </a>
-              </li>
+              {company.phone ? (
+                <li className="flex gap-3">
+                  <Phone className="mt-0.5 size-4 shrink-0 text-gold-600" aria-hidden />
+                  <a href={`tel:${company.phone.replace(/\s/g, "")}`} className="hover:text-gold-300">
+                    {company.phone}
+                  </a>
+                </li>
+              ) : null}
               <li className="flex gap-3">
                 <Mail className="mt-0.5 size-4 shrink-0 text-gold-600" aria-hidden />
                 <a href={`mailto:${company.email}`} className="hover:text-gold-300">

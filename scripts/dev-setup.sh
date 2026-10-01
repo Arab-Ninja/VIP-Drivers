@@ -17,9 +17,12 @@ if [ ! -d node_modules ]; then
 fi
 
 # --- environment ------------------------------------------------------------
+# An existing .env.local is never overwritten, but the database it points at
+# still has to be running: a resumed session starts with an empty container.
+KEEP_ENV=0
 if [ -f .env.local ] && grep -q '^DATABASE_URL=' .env.local; then
+  KEEP_ENV=1
   log ".env.local already configured, leaving it as is"
-  exit 0
 fi
 
 PG_BIN=""
@@ -59,6 +62,11 @@ fi
 psql -h 127.0.0.1 -p "$PORT" -U vip -d postgres -tAc \
   "SELECT 1 FROM pg_database WHERE datname='vipdrivers'" 2>/dev/null | grep -q 1 \
   || psql -h 127.0.0.1 -p "$PORT" -U vip -d postgres -c "CREATE DATABASE vipdrivers" >/dev/null 2>&1
+
+if [ "$KEEP_ENV" = "1" ]; then
+  log "database ready on port $PORT"
+  exit 0
+fi
 
 cat > .env.local <<ENVEOF
 # Written by scripts/dev-setup.sh for local development only.

@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { contactMessages } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { sendOperationsEmail } from "@/lib/email";
+import { notifyAdmins } from "@/server/notify";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -61,6 +62,14 @@ export async function submitContactMessage(formData: FormData): Promise<ContactR
     message: data.message,
     userId: user?.id ?? null,
   });
+
+  // In-app first: this is the only channel that works with nothing
+  // configured, and a missed message is a missed client.
+  await notifyAdmins({
+    title: `Nouveau message — ${data.subject}`,
+    body: `${data.name} (${email}) : ${data.message.slice(0, 120)}`,
+    url: "/admin/messages",
+  }).catch(() => {});
 
   // Best-effort: a failing mail provider must not lose the message, which is
   // already safely stored and visible in the admin panel.

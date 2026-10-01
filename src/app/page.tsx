@@ -225,12 +225,21 @@ export default async function HomePage() {
                 <ArrowRight />
               </Link>
             </Button>
-            <a
-              href={`tel:${company.phone.replace(/\s/g, "")}`}
-              className="text-sm tracking-wide text-ink-300 transition-colors hover:text-gold-300"
-            >
-              {company.phone}
-            </a>
+            {company.phone ? (
+              <a
+                href={`tel:${company.phone.replace(/\s/g, "")}`}
+                className="text-sm tracking-wide text-ink-300 transition-colors hover:text-gold-300"
+              >
+                {company.phone}
+              </a>
+            ) : (
+              <a
+                href={`mailto:${company.email}`}
+                className="text-sm tracking-wide text-ink-300 transition-colors hover:text-gold-300"
+              >
+                {company.email}
+              </a>
+            )}
           </div>
         </Container>
       </section>

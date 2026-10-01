@@ -16,7 +16,7 @@ const registerSchema = z.object({
 
 export type RegisterResult =
   | { ok: true }
-  | { ok: false; error: "invalid" | "email_taken" | "server"; field?: string };
+  | { ok: false; error: "invalid" | "email_taken" | "use_oauth" | "server"; field?: string };
 
 /**
  * Creates a password account. The caller signs in afterwards through the
@@ -45,10 +45,13 @@ export async function registerAccount(input: {
       .limit(1);
 
     if (existing) {
-      // An account created through Google has no password yet. Setting one
-      // here would let anyone who knows the address take it over, so this is
-      // refused just like a duplicate registration.
-      return { ok: false, error: "email_taken" };
+      /* A row with no password belongs either to someone who signed in with
+         Google, or to a guest who booked with this address. Letting anyone
+         set a password on it would hand them that person's bookings, so it is
+         refused — but with a message that points at the way in rather than a
+         flat "already taken", which would look like a dead end to the very
+         person who owns the address. */
+      return { ok: false, error: existing.passwordHash ? "email_taken" : "use_oauth" };
     }
 
     await db.insert(users).values({

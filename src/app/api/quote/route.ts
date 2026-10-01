@@ -3,6 +3,9 @@ import { buildQuote, quoteRequestSchema } from "@/server/quote";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// Upstream geocoding, routing and Stripe calls can be slow; the platform
+// default of 10s is not always enough.
+export const maxDuration = 30;
 
 /**
  * Live price preview. The response carries no more than the client needs to

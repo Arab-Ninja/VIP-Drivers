@@ -215,7 +215,11 @@ export const fr = {
     createdBody:
       "Votre réservation {reference} est en attente de paiement. Elle sera confirmée dès le règlement effectué.",
     payNow: "Payer maintenant",
-    minLeadTime: "La prise en charge doit être programmée au moins 2 heures à l'avance.",
+    verifyPayment: "Vérifier le paiement",
+    verifying: "Vérification…",
+    verifiedPaid: "Paiement confirmé.",
+    verifiedUnpaid: "Aucun paiement reçu pour l'instant. Si vous venez de payer, patientez une minute puis réessayez.",
+    minLeadTime: "La prise en charge doit être programmée au moins {days} jours à l'avance.",
     pastDate: "La date de prise en charge doit être dans le futur.",
   },
   status: {
@@ -255,6 +259,8 @@ export const fr = {
     passwordMismatch: "Les mots de passe ne correspondent pas.",
     invalidCredentials: "E-mail ou mot de passe incorrect.",
     emailTaken: "Un compte existe déjà avec cette adresse.",
+    useOauth:
+      "Cette adresse a déjà servi à une réservation. Connectez-vous avec Google pour retrouver vos trajets.",
     accountBlocked: "Ce compte a été suspendu. Contactez-nous.",
     googleUnavailable:
       "La connexion Google n'est pas encore configurée. Utilisez votre e-mail et mot de passe.",
@@ -380,10 +386,19 @@ export const fr = {
     companyInfo: "Informations de la société",
     defaultCommission: "Commission par défaut (%)",
     saved: "Modifications enregistrées.",
+    verifyPayments: "Vérifier les paiements en attente",
+    verifyPaymentsDone: "{checked} réservation(s) vérifiée(s), {confirmed} confirmée(s).",
+    webhookMissing: "Le webhook Stripe n'est pas configuré : les paiements ne seront pas confirmés automatiquement.",
     confirmDelete: "Cette action est définitive. Confirmer ?",
     noPermission: "Vous n'avez pas accès à cette page.",
   },
   notifications: {
+    title: "Notifications",
+    empty: "Aucune notification pour le moment.",
+    markAllRead: "Tout marquer comme lu",
+    markRead: "Marquer comme lu",
+    unreadCount: "{n} non lues",
+    viewAll: "Voir tout",
     enable: "Activer les notifications",
     enabled: "Notifications activées",
     blocked: "Notifications bloquées par le navigateur",

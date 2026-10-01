@@ -15,7 +15,9 @@ addresses, real distances and real prices.
 2. **Create a project**. Name it `vip-drivers`, region **Europe (Frankfurt)** —
    the closest to Brussels.
 3. On the project dashboard, copy the **Connection string**. Make sure the
-   **Pooled connection** toggle is on. It looks like:
+   **Pooled connection** toggle is on. Paste it exactly as Neon gives it —
+   the `channel_binding=require` it appends is a setting for a different
+   Postgres client and the app strips it for you. It looks like:
 
    ```
    postgresql://neondb_owner:xxxx@ep-xxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
@@ -34,7 +36,7 @@ Keep this tab open — you paste that string in Part 2.
 2. **Add New → Project**, choose the `VIP-Drivers` repository, and pick the
    branch you want to deploy.
 3. Vercel detects Next.js on its own. Leave every build setting alone.
-4. Open **Environment Variables** and add these three:
+4. Open **Environment Variables** and add exactly these three:
 
    | Name | Value |
    | --- | --- |
@@ -42,7 +44,25 @@ Keep this tab open — you paste that string in Part 2.
    | `AUTH_SECRET` | run `openssl rand -base64 32` and paste the result |
    | `ADMIN_EMAILS` | your email address |
 
+   Three things to get right here, because each one silently breaks something:
+
+   - **The names must match exactly.** `AUTH_SECRET`, not `JWT_SECRET` or
+     `SECRET_KEY`. A variable under any other name is simply not read.
+   - **Paste the value only.** No quotes, and no `< >` brackets — those appear
+     in documentation to mark a placeholder and are not part of the value.
+   - **Do not add a variable you have no value for yet.** Leave it out
+     entirely rather than creating it blank. Add Stripe, Google and the rest
+     in the later parts, when you actually have their keys.
+
+   You do **not** need `NEXT_PUBLIC_APP_URL`. Vercel tells the app its own
+   address, and each preview deployment gets its own. Set it only once you
+   have a custom domain (Part 8).
+
 5. Click **Deploy** and wait about a minute.
+
+> Optional: under **Settings → Functions**, set the region to **Frankfurt
+> (fra1)**. It is the closest to Brussels and shaves latency off every page.
+> The default works fine, so skip it if the option is not offered on your plan.
 
 ### Create the tables and load the fleet
 
@@ -293,6 +313,26 @@ quality.
 
 **"Too many connections" from the database.** You are using the unpooled Neon
 string. Switch to the pooled one (its host contains `-pooler`).
+
+**A variable seems to be ignored.** Check its name character for character
+against the table above, and check the value has no surrounding quotes or
+`< >` brackets. Then confirm it is enabled for the **Production** environment
+and **redeploy** — a deployment keeps the values it was built with.
+
+**The Vercel build fails.** The build must never need your runtime secrets —
+it compiles the code, it does not run your app. If a build error mentions a
+missing environment variable, that is a bug rather than a configuration
+problem: the app is written so that `next build` succeeds with no variables at
+all, and a missing one surfaces as a clear error on the first request instead.
+Open the full build log, and check the failing step is not something else
+entirely (a TypeScript error, or a dependency that failed to install).
+
+**Everything 500s right after deploying.** The build succeeds without
+environment variables, so the first sign that one is missing is at runtime.
+Open **Vercel → your deployment → Runtime Logs**; the error names the exact
+variable. `DATABASE_URL` and `AUTH_SECRET` are the two the app cannot run
+without. After adding a variable you must **redeploy** — existing deployments
+keep the values they were built with.
 
 **A price looks wrong.** Open the booking: the full breakdown is stored on it,
 showing the metered fare, any minimum-fare adjustment, each surcharge and the

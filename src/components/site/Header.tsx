@@ -8,6 +8,7 @@ import { Menu, X, LayoutDashboard, LogOut, User as UserIcon, Car, Shield } from 
 
 import { Logo } from "@/components/Logo";
 import { LocaleSwitcher } from "@/components/site/LocaleSwitcher";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/client";
 import { cn, initials } from "@/lib/utils";
@@ -21,7 +22,13 @@ export type HeaderUser = {
   role: UserRole;
 };
 
-export function Header({ user }: { user: HeaderUser | null }) {
+export function Header({
+  user,
+  unreadNotifications = 0,
+}: {
+  user: HeaderUser | null;
+  unreadNotifications?: number;
+}) {
   const { t } = useI18n();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -104,6 +111,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
 
           {user ? (
             <div className="flex items-center gap-3">
+              <NotificationBell initialUnread={unreadNotifications} />
               {areaLink ? (
                 <Link
                   href={areaLink.href}
@@ -142,16 +150,19 @@ export function Header({ user }: { user: HeaderUser | null }) {
           </Button>
         </div>
 
-        <button
+        <div className="flex items-center gap-1 lg:hidden">
+          {user ? <NotificationBell initialUnread={unreadNotifications} /> : null}
+          <button
           type="button"
-          className="grid size-10 place-items-center text-ink-100 lg:hidden"
+          className="grid size-10 place-items-center text-ink-100"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={t.nav.menu}
         >
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}

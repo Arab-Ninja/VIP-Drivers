@@ -17,6 +17,7 @@ import {
   Mail,
   Loader2,
   Ban,
+  RefreshCw,
 } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -25,7 +26,7 @@ import { StatusBadge, PaymentBadge } from "@/components/StatusBadge";
 import { useI18n } from "@/i18n/client";
 import { formatCents, type PriceQuote } from "@/lib/pricing";
 import { formatDateTime, formatDistance, formatDuration, cn } from "@/lib/utils";
-import { startCheckout } from "@/app/actions/payment";
+import { startCheckout, verifyPayment } from "@/app/actions/payment";
 import { cancelOwnBooking } from "@/app/actions/booking";
 import { PriceSummary } from "@/components/booking/PriceSummary";
 import type { Booking } from "@/db/schema";
@@ -37,6 +38,8 @@ export type BookingDetailProps = {
   driver: { name: string | null; phone: string | null; companyName: string | null } | null;
   /** Whether the viewer may pay for and cancel this booking. */
   canManage: boolean;
+  /** Present when the viewer reached this booking through a signed guest link. */
+  accessToken?: string | null;
   paymentsAvailable: boolean;
   demoMode: boolean;
 };
@@ -47,12 +50,14 @@ export function BookingDetail({
   vehicleImage,
   driver,
   canManage,
+  accessToken = null,
   paymentsAvailable,
   demoMode,
 }: BookingDetailProps) {
   const { t, intl } = useI18n();
   const router = useRouter();
   const [paying, startPaying] = useTransition();
+  const [verifying, startVerifying] = useTransition();
   const [cancelling, setCancelling] = useState(false);
 
   const quote = (booking.priceBreakdown ?? null) as PriceQuote | null;
@@ -62,7 +67,7 @@ export function BookingDetail({
 
   function onPay() {
     startPaying(async () => {
-      const result = await startCheckout(booking.id);
+      const result = await startCheckout(booking.id, accessToken);
       if (!result.ok) {
         toast.error(t.common.errorTitle);
         return;
@@ -76,11 +81,27 @@ export function BookingDetail({
     });
   }
 
+  function onVerify() {
+    startVerifying(async () => {
+      const result = await verifyPayment(booking.id, accessToken);
+      if (!result.ok) {
+        toast.error(t.common.errorTitle);
+        return;
+      }
+      if (result.paid) {
+        toast.success(t.booking.verifiedPaid);
+        router.refresh();
+      } else {
+        toast.info(t.booking.verifiedUnpaid);
+      }
+    });
+  }
+
   async function onCancel() {
     if (!window.confirm(t.account.cancelConfirm)) return;
     setCancelling(true);
     try {
-      const result = await cancelOwnBooking(booking.id);
+      const result = await cancelOwnBooking(booking.id, accessToken);
       if (!result.ok) {
         toast.error(t.common.errorTitle);
         return;
@@ -274,6 +295,19 @@ export function BookingDetail({
                 {paying ? <Loader2 className="animate-spin" /> : <CreditCard />}
                 {paying ? t.common.loading : t.booking.payNow}
               </Button>
+
+              {booking.paymentStatus === "processing" ? (
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  className="mt-3 w-full"
+                  onClick={onVerify}
+                  disabled={verifying}
+                >
+                  {verifying ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                  {verifying ? t.booking.verifying : t.booking.verifyPayment}
+                </Button>
+              ) : null}
 
               {!paymentsAvailable ? (
                 <p className="mt-3 text-[0.7rem] leading-relaxed text-warning">

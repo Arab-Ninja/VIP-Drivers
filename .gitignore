@@ -47,3 +47,7 @@ dbg.mjs
 e2e-roles.mjs
 check.mjs
 of.mjs
+prod-smoke.mjs
+e2e-guest.mjs
+e2e-notif.mjs
+e2e-guestpay.mjs

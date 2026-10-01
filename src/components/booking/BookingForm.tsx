@@ -80,6 +80,8 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
     return d;
   }, [limits.minimumLeadTimeHours]);
 
+  const leadDays = Math.ceil(limits.minimumLeadTimeHours / 24);
+
   const [scheduledAt, setScheduledAt] = useState(() => toLocalInputValue(earliest));
   const [durationHours, setDurationHours] = useState(3);
 
@@ -156,7 +158,7 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
         setRoute(null);
         setQuoteError(
           data?.error === "lead_time"
-            ? t.booking.minLeadTime
+            ? fill(t.booking.minLeadTime, { days: leadDays })
             : data?.error === "past_date"
               ? t.booking.pastDate
               : t.booking.routeError,
@@ -236,14 +238,9 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
       });
 
       if (!result.ok) {
-        if (result.error === "unauthenticated") {
-          toast.error(t.booking.mustLogin);
-          router.push(`/login?callbackUrl=${encodeURIComponent("/booking")}`);
-          return;
-        }
         toast.error(
           result.error === "lead_time"
-            ? t.booking.minLeadTime
+            ? fill(t.booking.minLeadTime, { days: leadDays })
             : result.error === "past_date"
               ? t.booking.pastDate
               : t.common.errorTitle,
@@ -251,7 +248,12 @@ export function BookingForm({ vehicles, defaults, limits, user }: BookingFormPro
         return;
       }
 
-      router.push(`/booking/${result.reference}`);
+      // A guest is handed a signed link to the booking they just made.
+      router.push(
+        result.accessToken
+          ? `/booking/${result.reference}?t=${encodeURIComponent(result.accessToken)}`
+          : `/booking/${result.reference}`,
+      );
     } finally {
       setSubmitting(false);
     }
