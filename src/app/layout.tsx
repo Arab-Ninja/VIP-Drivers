@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { getLocale, getDictionary } from "@/i18n";
 import { I18nProvider } from "@/i18n/client";
 import { getCompanyInfo } from "@/lib/settings";
+import { countUnreadNotifications } from "@/server/notifications";
 import { Header, type HeaderUser } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
@@ -65,6 +66,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [session, locale, company] = await Promise.all([auth(), getLocale(), getCompanyInfo()]);
   const dictionary = getDictionary(locale);
 
+  // A failure here must not take the whole shell down; the badge just shows 0.
+  const unreadNotifications = session?.user?.id
+    ? await countUnreadNotifications(session.user.id).catch(() => 0)
+    : 0;
+
   const user: HeaderUser | null = session?.user
     ? {
         id: session.user.id,
@@ -87,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {locale === "fr" ? "Aller au contenu" : "Skip to content"}
             </a>
             <ServiceWorkerRegistrar />
-            <Header user={user} />
+            <Header user={user} unreadNotifications={unreadNotifications} />
             <main id="main" className="pt-20">
               {children}
             </main>

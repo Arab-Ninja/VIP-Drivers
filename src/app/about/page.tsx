@@ -116,17 +116,19 @@ export default async function AboutPage() {
                   <dt className="text-xs text-ink-400">{t.footer.vatLabel}</dt>
                   <dd className="mt-0.5 text-ink-100">{company.vatNumber}</dd>
                 </div>
-                <div>
-                  <dt className="text-xs text-ink-400">{t.contact.phone}</dt>
-                  <dd className="mt-0.5">
-                    <a
-                      href={`tel:${company.phone.replace(/\s/g, "")}`}
-                      className="text-gold-300 hover:text-gold-200"
-                    >
-                      {company.phone}
-                    </a>
-                  </dd>
-                </div>
+                {company.phone ? (
+                  <div>
+                    <dt className="text-xs text-ink-400">{t.contact.phone}</dt>
+                    <dd className="mt-0.5">
+                      <a
+                        href={`tel:${company.phone.replace(/\s/g, "")}`}
+                        className="text-gold-300 hover:text-gold-200"
+                      >
+                        {company.phone}
+                      </a>
+                    </dd>
+                  </div>
+                ) : null}
                 <div>
                   <dt className="text-xs text-ink-400">{t.contact.email}</dt>
                   <dd className="mt-0.5">

@@ -76,7 +76,9 @@ export type OperationalSettings = {
 
 export const DEFAULT_OPERATIONAL_SETTINGS: OperationalSettings = {
   defaultCommissionBps: 2000,
-  minimumLeadTimeHours: 2,
+  // Two full days: the operator needs time to assign a chauffeur and the
+  // client's payment to clear before the car is committed.
+  minimumLeadTimeHours: 48,
   minDisposalHours: 1,
   maxDisposalHours: 12,
   maxStops: 5,

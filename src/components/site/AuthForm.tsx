@@ -90,7 +90,11 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
 
         if (!result.ok) {
           const message =
-            result.error === "email_taken" ? t.auth.emailTaken : t.auth.genericError;
+            result.error === "email_taken"
+              ? t.auth.emailTaken
+              : result.error === "use_oauth"
+                ? t.auth.useOauth
+                : t.auth.genericError;
           setError(message);
           toast.error(message);
           return;

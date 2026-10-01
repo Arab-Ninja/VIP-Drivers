@@ -219,6 +219,12 @@ export async function claimBooking(bookingId: string, driverId: string): Promise
     url: `/booking/${booking.reference}`,
   }).catch(() => {});
 
+  await notifyAdmins({
+    title: "Trajet pris par un chauffeur",
+    body: `${booking.reference} a été attribué.`,
+    url: `/admin/bookings/${booking.id}`,
+  }).catch(() => {});
+
   return { ok: true };
 }
 
@@ -250,6 +256,12 @@ export async function completeBooking(
     title: "Trajet terminé",
     body: `Votre trajet ${updated[0].reference} est terminé. Merci de votre confiance.`,
     url: `/booking/${updated[0].reference}`,
+  }).catch(() => {});
+
+  await notifyAdmins({
+    title: "Trajet terminé",
+    body: `${updated[0].reference} a été marqué comme terminé.`,
+    url: `/admin/bookings/${bookingId}`,
   }).catch(() => {});
 
   return { ok: true };

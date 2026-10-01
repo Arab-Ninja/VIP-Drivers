@@ -144,6 +144,37 @@ async function seedFleet() {
   }
 }
 
+/**
+ * Brings stored settings forward when a default changes.
+ *
+ * Settings live in the database, so a new default never reaches a deployment
+ * that has already been seeded. Each migration only fires when the stored
+ * value is still the old default, so an operator's own choice is never
+ * overwritten.
+ */
+async function migrateSettings() {
+  const [row] = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.key, SETTING_KEYS.operations))
+    .limit(1);
+  if (!row) return;
+
+  const stored = row.value as Partial<typeof DEFAULT_OPERATIONAL_SETTINGS>;
+
+  // The minimum lead time moved from 2 hours to 2 days.
+  if (stored.minimumLeadTimeHours === 2) {
+    await db
+      .update(settings)
+      .set({
+        value: { ...stored, minimumLeadTimeHours: 48 },
+        updatedAt: new Date(),
+      })
+      .where(eq(settings.key, SETTING_KEYS.operations));
+    console.log("  ~ minimum lead time 2h -> 48h");
+  }
+}
+
 async function seedSettings() {
   const rows = [
     { key: SETTING_KEYS.company, value: DEFAULT_COMPANY_INFO },
@@ -442,6 +473,7 @@ async function main() {
 
   console.log("\nSettings:");
   await seedSettings();
+  await migrateSettings();
 
   if (demo) {
     console.log("\nDemo data:");

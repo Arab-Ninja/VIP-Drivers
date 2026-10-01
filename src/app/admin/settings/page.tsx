@@ -7,6 +7,7 @@ import { getCompanyInfo, getPricingRules, getOperationalSettings } from "@/lib/s
 import { countUnreadMessages } from "@/server/admin";
 import { DashboardShell } from "@/components/DashboardShell";
 import { adminTabs } from "@/components/admin/AdminTabs";
+import { PaymentDiagnostics } from "@/components/admin/PaymentDiagnostics";
 import {
   CompanyInfoForm,
   PricingRulesForm,
@@ -36,6 +37,11 @@ export default async function AdminSettingsPage() {
       name: `Stripe${env.stripe.enabled && env.stripe.isTestMode ? " (test)" : ""}`,
       on: env.stripe.enabled,
       hint: "STRIPE_SECRET_KEY",
+    },
+    {
+      name: "Webhook Stripe",
+      on: Boolean(env.stripe.webhookSecret),
+      hint: "STRIPE_WEBHOOK_SECRET",
     },
     { name: "PayPal", on: env.paypal.enabled, hint: "PAYPAL_CLIENT_ID" },
     { name: "Mapbox", on: env.mapbox.enabled, hint: "MAPBOX_TOKEN (sinon OpenStreetMap)" },
@@ -81,6 +87,7 @@ export default async function AdminSettingsPage() {
           ) : null}
         </Card>
 
+        <PaymentDiagnostics webhookConfigured={Boolean(env.stripe.webhookSecret)} />
         <PricingRulesForm initial={pricing} />
         <OperationsForm initial={operations} />
         <CompanyInfoForm initial={company} />
